@@ -24,7 +24,6 @@ import {
   Search,
   Settings,
   Share2,
-  Sparkles,
   Sun,
   Tv,
   Unlock,
@@ -228,9 +227,8 @@ export const AppHeader: React.FC = () => {
           </Tooltip>
 
           <div className="flex items-center gap-2 font-bold text-sm tracking-tight text-slate-900 dark:text-slate-100 shrink-0">
-            <div className="h-7 w-7 rounded-lg bg-gradient-to-br from-blue-500 via-indigo-500 to-purple-600 flex items-center justify-center text-white shadow-md shadow-blue-500/20">
-              <Sparkles className="h-4 w-4" />
-            </div>
+            {/* biome-ignore lint/performance/noImgElement: small static brand mark, next/image is overkill */}
+            <img src="/assets/logo_trans.png" alt="Dnyx Draft" className="h-7 w-7" />
             <span className="hidden md:inline font-semibold">Dnyx Draft</span>
           </div>
 

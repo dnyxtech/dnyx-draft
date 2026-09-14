@@ -92,8 +92,8 @@ export const metadata: Metadata = {
   },
   manifest: '/manifest.json',
   icons: {
-    icon: '/assets/icon.jpg',
-    apple: '/assets/icon.jpg',
+    icon: '/assets/logo_trans.png',
+    apple: '/assets/logo_trans.png',
   },
   openGraph: {
     type: 'website',
@@ -119,9 +119,9 @@ export const metadata: Metadata = {
     description: APP_DESCRIPTION,
     images: [
       {
-        url: '/assets/icon.jpg',
-        width: 512,
-        height: 512,
+        url: '/assets/logo_with_name.png',
+        width: 2000,
+        height: 2000,
         alt: 'Dnyx Draft Logo',
       },
     ],
@@ -130,7 +130,7 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     title: APP_TITLE,
     description: APP_DESCRIPTION,
-    images: ['/assets/icon.jpg'],
+    images: ['/assets/logo_with_name.png'],
   },
   robots: {
     index: true,

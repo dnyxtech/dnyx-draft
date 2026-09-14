@@ -1,6 +1,6 @@
 <div align="center">
 
-  <img src="../assets/icon.jpg" alt="Dnyx Draft 徽标" width="100" />
+  <img src="../assets/logo_trans.png" alt="Dnyx Draft 徽标" width="100" />
 
   <h1>Dnyx Draft</h1>
 

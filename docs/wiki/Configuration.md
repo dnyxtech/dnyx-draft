@@ -110,7 +110,7 @@ Critical assets:
 - `/script.js`
 - `/preview-worker.js`
 - `/manifest.json`
-- `/assets/icon.jpg`
+- `/assets/logo_trans.png`
 
 Local shell assets use network-first behavior with cache fallback for update-sensitive paths. CDN assets from cdnjs and jsDelivr use cache-first behavior after first successful fetch. The service worker removes old `dnyx-draft-cache-*` caches on activation.
 

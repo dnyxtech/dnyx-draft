@@ -32,9 +32,8 @@ export const Navbar: React.FC = () => {
     <header className="sticky top-0 z-50 w-full border-b border-border bg-background/85 backdrop-blur-md transition-colors">
       <div className="max-w-6xl mx-auto flex h-16 items-center justify-between px-6">
         <Link href="/" className="flex items-center gap-2.5 font-mono font-medium text-lg tracking-tight shrink-0">
-          <div className="h-8 w-8 rounded-[var(--radius)] bg-primary flex items-center justify-center text-primary-foreground text-sm">
-            D
-          </div>
+          {/* biome-ignore lint/performance/noImgElement: small static brand mark, next/image is overkill */}
+          <img src="/assets/logo_trans.png" alt="Dnyx Draft" className="h-8 w-8" />
           <span className="text-foreground">Dnyx Draft</span>
         </Link>
 

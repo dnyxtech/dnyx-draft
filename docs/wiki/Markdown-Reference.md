@@ -111,12 +111,12 @@ Highlight.js colors known languages. Unknown languages fall back to plaintext.
 [GitHub with title](https://github.com "GitHub")
 [Reference link][repo]
 
-![Alt text](../assets/icon.jpg)
-![Alt text with title](../assets/icon.jpg "Logo")
+![Alt text](../assets/logo_trans.png)
+![Alt text with title](../assets/logo_trans.png "Logo")
 ![Reference image][logo]
 
 [repo]: https://github.com/dnyxtech/dnyx-draft
-[logo]: ../assets/icon.jpg
+[logo]: ../assets/logo_trans.png
 ```
 
 Links and images can request external resources when opened or rendered.

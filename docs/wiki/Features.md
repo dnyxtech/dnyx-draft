@@ -467,7 +467,7 @@ Accessibility behavior:
 The web app registers `sw.js` when service workers are supported.
 
 - The service worker cache name is versioned in `sw.js` so stale caches can be retired safely.
-- Critical local assets include `/`, `index.html`, `workspace-storage.js`, `script.js`, `preview-worker.js`, `styles.css`, `assets/lucide-icons.css`, `sample.md`, `manifest.json`, and `assets/icon.jpg`.
+- Critical local assets include `/`, `index.html`, `workspace-storage.js`, `script.js`, `preview-worker.js`, `styles.css`, `assets/lucide-icons.css`, `sample.md`, `manifest.json`, and `assets/logo_trans.png`.
 - Local shell assets use a network-first strategy for update-sensitive paths, falling back to cache when offline.
 - CDN assets from cdnjs and jsDelivr use cache-first behavior after first successful load.
 - The app manifest allows standalone PWA installation.

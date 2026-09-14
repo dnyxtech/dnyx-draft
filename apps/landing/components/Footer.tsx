@@ -13,9 +13,8 @@ export const Footer: React.FC = () => {
         <div className="grid grid-cols-1 md:grid-cols-12 gap-10 pb-12 border-b border-border">
           <div className="md:col-span-5 space-y-4">
             <div className="flex items-center gap-2.5">
-              <div className="h-8 w-8 rounded-[var(--radius)] bg-primary flex items-center justify-center text-primary-foreground font-mono text-sm">
-                D
-              </div>
+              {/* biome-ignore lint/performance/noImgElement: small static brand mark, next/image is overkill */}
+              <img src="/assets/logo_trans.png" alt="Dnyx Draft" className="h-8 w-8" />
               <span className="font-mono font-medium text-foreground text-base tracking-tight">Dnyx Draft</span>
             </div>
 

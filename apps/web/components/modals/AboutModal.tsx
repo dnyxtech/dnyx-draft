@@ -1,13 +1,6 @@
 'use client';
 
-import {
-  ExternalLink,
-  FileText,
-  Megaphone,
-  MessageCircleQuestion,
-  Scale,
-  Sparkles,
-} from 'lucide-react';
+import { ExternalLink, FileText, Megaphone, MessageCircleQuestion, Scale } from 'lucide-react';
 import type React from 'react';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
@@ -52,9 +45,8 @@ export const AboutModal: React.FC<AboutModalProps> = ({ open, onOpenChange }) =>
       <DialogContent className="sm:max-w-[440px]">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
-            <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-blue-500 via-indigo-500 to-purple-600 flex items-center justify-center text-white shadow-md shadow-blue-500/25">
-              <Sparkles className="h-4 w-4" />
-            </div>
+            {/* biome-ignore lint/performance/noImgElement: small static brand mark, next/image is overkill */}
+            <img src="/assets/logo_trans.png" alt="Dnyx Draft" className="h-8 w-8" />
             Dnyx Draft
             <span className="ml-auto text-[11px] font-mono px-2 py-0.5 rounded-full bg-blue-100 dark:bg-blue-950 text-blue-600 dark:text-blue-400">
               v{APP_VERSION}

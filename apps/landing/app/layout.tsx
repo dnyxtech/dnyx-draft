@@ -35,6 +35,31 @@ export const metadata: Metadata = {
     'readme generator',
   ],
   authors: [{ name: 'Dnyx Tech', url: 'https://github.com/dnyxtech' }],
+  icons: {
+    icon: '/assets/logo_trans.png',
+    apple: '/assets/logo_trans.png',
+  },
+  openGraph: {
+    type: 'website',
+    title: 'Dnyx Draft — Local-First Markdown Workspace with BYOK AI',
+    description:
+      'Private, local-first Markdown editor with live preview, LaTeX math, 12+ diagram engines, a multi-format file viewer, bring-your-own-key AI writing, and real-time collaboration.',
+    images: [
+      {
+        url: '/assets/logo_with_name.png',
+        width: 2000,
+        height: 2000,
+        alt: 'Dnyx Draft Logo',
+      },
+    ],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Dnyx Draft — Local-First Markdown Workspace with BYOK AI',
+    description:
+      'Private, local-first Markdown editor with live preview, LaTeX math, 12+ diagram engines, a multi-format file viewer, bring-your-own-key AI writing, and real-time collaboration.',
+    images: ['/assets/logo_with_name.png'],
+  },
 };
 
 export default function RootLayout({
