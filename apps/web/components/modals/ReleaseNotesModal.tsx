@@ -4,9 +4,17 @@ import { ExternalLink, Megaphone, X } from 'lucide-react';
 import type React from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 
-const APP_VERSION = '1.0.0';
+const APP_VERSION = '1.1.0';
 
 const RELEASE_NOTES = [
+  {
+    version: '1.1.0',
+    date: '2026-09-14',
+    highlights: [
+      'New: Insert image, GIF, or video — upload a file (stored locally, no server) or paste a media URL',
+      'Fixed: Emoji picker now renders correctly and inserts emojis reliably',
+    ],
+  },
   {
     version: '1.0.0',
     date: '2026-09-14',

@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ---
 
+## [1.1.0] - 2026-09-14
+
+### Added
+- **Insert Media modal**: "Insert image, GIF, or video" with an Upload tab (stores the file locally in IndexedDB via a new `dnyx-blob:` URI scheme — no server involved) and an External Media (URL) tab. Replaces the previous one-click toolbar button that inserted a placeholder-URL Markdown snippet. `MarkdownPreview` resolves `dnyx-blob:` references to cached, reference-counted object URLs; workspace ZIP export writes them out as real files under `assets/` with rewritten relative paths.
+
+### Fixed
+- **Emoji picker**: the mount effect was keyed on a plain ref, but Radix's Dialog portals its content on a later commit than the one where the dialog opens — the effect could run once while the ref was still `null` and never retry, leaving the picker stuck loading indefinitely. Now tracked via a callback ref in state so the effect re-fires once the element mounts. Also corrected a CSS selector that targeted a direct child instead of the actual nested custom element, and added loading/error/retry states.
+
+---
+
 ## [1.0.0] - 2026-09-14
 
 🚀 **Public launch of Dnyx Draft.**
