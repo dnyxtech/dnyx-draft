@@ -7,6 +7,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ---
 
+## [1.2.0] - 2026-09-14
+
+### Added
+- **Secret Workspace**: a seeded folder created on first run alongside the existing `Welcome.md`, containing an unlocked welcome document that walks the user through the app's zero-knowledge document lock feature and how to lock it themselves. Never seeded pre-locked, since the encryption is zero-knowledge and no password is ever stored.
+- **Diagrams & More** (replaces the old Insert Diagram modal): reorganized into 5 categories — Flowcharts & Diagrams (Mermaid/PlantUML/Graphviz/D2), Mind Maps (Markmap), Data Visualization (Vega-Lite), Technical Notation (WaveDrom/ABC), and 3D & Maps (STL/GeoJSON). Selecting a template now shows an editable code pane with a live render preview (reusing the app's existing diagram viewers) before insert, plus optional reference fields (title, reference #, link) that append a citation caption to the inserted block.
+- **Markdown alert blocks**: GitHub-style `[!NOTE]`/`[!TIP]`/`[!IMPORTANT]`/`[!WARNING]`/`[!CAUTION]` blockquotes now render as styled callout boxes with per-type icon and color in the preview pane, in addition to the existing toolbar insertion shortcut.
+- **Symbols & HTML Entities picker**: a new toolbar modal with categorized Unicode symbols (arrows, math, currency, punctuation, Greek, misc) for one-click insertion.
+- **Copy document** and **horizontal rule** toolbar buttons.
+- **Live Share** is now surfaced directly in the top toolbar (previously only reachable via the side activity bar), and the participant access-mode toggle was redesigned for clarity between "Can edit" and "View only".
+- **About Dnyx Draft** modal: license, changelog link, FAQ link, "developed and maintained by" attribution, and a "Report an Issue" button that opens a prefilled GitHub issue (including the current app version).
+- **Settings → Storage & Backup**: configurable trash retention period (replacing two previously hardcoded, drifted constants), a "Clear Browser Data" action that wipes local documents/settings/service-worker caches, and a "Reset Workspace" action that restores the first-run seeded state — both gated behind type-to-confirm.
+- **Private Mode**: a one-click screen-privacy toggle (Settings or a header icon) that blurs the sidebar and document content behind a "click to reveal" overlay. Purely visual — does not touch document encryption or storage.
+- Settings' existing theme sections are now grouped under an explicit "Appearance" heading.
+
+---
+
 ## [1.1.0] - 2026-09-14
 
 ### Added

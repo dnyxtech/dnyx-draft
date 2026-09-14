@@ -37,6 +37,8 @@ export interface SettingsState {
   textDirection: TextDirection;
   language: AppLanguage;
   lastSeenVersion: string;
+  trashRetentionDays: number;
+  privateMode: boolean;
 
   setTheme: (theme: 'light' | 'dark' | 'system') => void;
   setFontSize: (size: number) => void;
@@ -55,6 +57,8 @@ export interface SettingsState {
   setTextDirection: (dir: TextDirection) => void;
   setLanguage: (lang: AppLanguage) => void;
   setLastSeenVersion: (version: string) => void;
+  setTrashRetentionDays: (days: number) => void;
+  setPrivateMode: (enabled: boolean) => void;
 }
 
 export const useSettingsStore = create<SettingsState>()(
@@ -77,6 +81,8 @@ export const useSettingsStore = create<SettingsState>()(
       textDirection: 'ltr',
       language: 'en',
       lastSeenVersion: '',
+      trashRetentionDays: 30,
+      privateMode: false,
 
       setTheme: (theme) => set({ theme }),
       setFontSize: (fontSize) => set({ fontSize }),
@@ -95,6 +101,11 @@ export const useSettingsStore = create<SettingsState>()(
       setTextDirection: (textDirection) => set({ textDirection }),
       setLanguage: (language) => set({ language }),
       setLastSeenVersion: (lastSeenVersion) => set({ lastSeenVersion }),
+      setTrashRetentionDays: (trashRetentionDays) => set({ trashRetentionDays }),
+      // Not persisted (see partialize below) — a quick screen-privacy toggle
+      // should default back to visible on a fresh page load, not stay
+      // hidden indefinitely if the user forgets to turn it off.
+      setPrivateMode: (privateMode) => set({ privateMode }),
     }),
     {
       name: 'md-viewer-settings',
@@ -116,6 +127,7 @@ export const useSettingsStore = create<SettingsState>()(
         textDirection: state.textDirection,
         language: state.language,
         lastSeenVersion: state.lastSeenVersion,
+        trashRetentionDays: state.trashRetentionDays,
       }),
     },
   ),

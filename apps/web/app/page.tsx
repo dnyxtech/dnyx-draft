@@ -1,5 +1,6 @@
 'use client';
 
+import { EyeOff } from 'lucide-react';
 import type React from 'react';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { MarkdownEditor, type MarkdownEditorRef } from '@/components/editor/MarkdownEditor';
@@ -16,7 +17,7 @@ import { useWorkspaceStore } from '@/lib/store/useWorkspaceStore';
 export default function WorkspacePage() {
   const { documents, activeDocumentId, isSidebarOpen, viewMode, setActiveDocument, initialize } =
     useWorkspaceStore();
-  const { syncScroll, splitRatio, setSplitRatio } = useSettingsStore();
+  const { syncScroll, splitRatio, setSplitRatio, privateMode, setPrivateMode } = useSettingsStore();
 
   const editorRef = useRef<MarkdownEditorRef | null>(null);
   const previewRef = useRef<HTMLDivElement | null>(null);
@@ -134,70 +135,86 @@ export default function WorkspacePage() {
       <AppHeader />
       <DocumentTabs />
 
-      <main className="flex-1 flex overflow-hidden">
-        {/*
+      <main className="flex-1 flex overflow-hidden relative">
+        {privateMode && (
+          <button
+            type="button"
+            onClick={() => setPrivateMode(false)}
+            className="absolute inset-0 z-50 flex flex-col items-center justify-center gap-3 bg-white/70 dark:bg-slate-950/70 backdrop-blur-sm cursor-pointer"
+          >
+            <EyeOff className="h-8 w-8 text-slate-400" />
+            <p className="text-sm font-medium text-slate-600 dark:text-slate-300">
+              Private Mode — click to reveal
+            </p>
+          </button>
+        )}
+        <div
+          className={`flex flex-1 overflow-hidden transition-all ${privateMode ? 'blur-2xl pointer-events-none select-none' : ''}`}
+        >
+          {/*
           Fix #12: ActivityBar dispatches custom DOM events.
           AppHeader listens and owns the single modal instances.
         */}
-        <ActivityBar
-          onOpenSettings={() => window.dispatchEvent(new Event('md:open-settings'))}
-          onOpenPresentation={() => window.dispatchEvent(new Event('md:open-presentation'))}
-        />
+          <ActivityBar
+            onOpenSettings={() => window.dispatchEvent(new Event('md:open-settings'))}
+            onOpenPresentation={() => window.dispatchEvent(new Event('md:open-presentation'))}
+          />
 
-        {isSidebarOpen && <WorkspaceSidebar />}
+          {isSidebarOpen && <WorkspaceSidebar />}
 
-        {/* Content area */}
-        <div ref={containerRef} className="flex-1 flex overflow-hidden relative">
-          {/* Non-markdown file viewer (full-pane) */}
-          {activeDoc?.fileType && activeDoc.fileType !== 'markdown' ? (
-            <div className="flex-1 overflow-hidden">
-              <FileViewerRouter doc={activeDoc} />
-            </div>
-          ) : (
-            <>
-              {/* Editor pane */}
-              {(viewMode === 'editor' || viewMode === 'split') && (
-                <div
-                  className={`h-full overflow-hidden ${
-                    viewMode === 'split'
-                      ? 'border-r border-slate-200 dark:border-slate-800'
-                      : 'w-full'
-                  }`}
-                  style={viewMode === 'split' ? { width: `${splitRatio}%` } : undefined}
-                >
-                  <MarkdownEditor ref={editorRef} onScrollPercent={handleEditorScroll} />
-                </div>
-              )}
+          {/* Content area */}
+          <div ref={containerRef} className="flex-1 flex overflow-hidden relative">
+            {/* Non-markdown file viewer (full-pane) */}
+            {activeDoc?.fileType && activeDoc.fileType !== 'markdown' ? (
+              <div className="flex-1 overflow-hidden">
+                <FileViewerRouter doc={activeDoc} />
+              </div>
+            ) : (
+              <>
+                {/* Editor pane */}
+                {(viewMode === 'editor' || viewMode === 'split') && (
+                  <div
+                    className={`h-full overflow-hidden ${
+                      viewMode === 'split'
+                        ? 'border-r border-slate-200 dark:border-slate-800'
+                        : 'w-full'
+                    }`}
+                    style={viewMode === 'split' ? { width: `${splitRatio}%` } : undefined}
+                  >
+                    <MarkdownEditor ref={editorRef} onScrollPercent={handleEditorScroll} />
+                  </div>
+                )}
 
-              {/* Drag divider */}
-              {viewMode === 'split' && (
-                <div
-                  onMouseDown={handleDividerMouseDown}
-                  className={`hidden md:flex w-1 flex-col items-center justify-center cursor-col-resize bg-slate-200 dark:bg-slate-800 hover:bg-blue-400 dark:hover:bg-blue-600 transition-colors group relative shrink-0 z-10 ${
-                    isDragging ? 'bg-blue-500 dark:bg-blue-500' : ''
-                  }`}
-                  title="Drag to resize"
-                >
-                  <div className="w-0.5 h-8 rounded-full bg-slate-400 dark:bg-slate-600 group-hover:bg-blue-500 dark:group-hover:bg-blue-400 transition-colors" />
-                </div>
-              )}
+                {/* Drag divider */}
+                {viewMode === 'split' && (
+                  <div
+                    onMouseDown={handleDividerMouseDown}
+                    className={`hidden md:flex w-1 flex-col items-center justify-center cursor-col-resize bg-slate-200 dark:bg-slate-800 hover:bg-blue-400 dark:hover:bg-blue-600 transition-colors group relative shrink-0 z-10 ${
+                      isDragging ? 'bg-blue-500 dark:bg-blue-500' : ''
+                    }`}
+                    title="Drag to resize"
+                  >
+                    <div className="w-0.5 h-8 rounded-full bg-slate-400 dark:bg-slate-600 group-hover:bg-blue-500 dark:group-hover:bg-blue-400 transition-colors" />
+                  </div>
+                )}
 
-              {/* Preview pane */}
-              {(viewMode === 'preview' || viewMode === 'split') && (
-                <div
-                  className={`h-full overflow-hidden ${
-                    viewMode === 'split' ? 'hidden md:block flex-1' : 'w-full'
-                  }`}
-                >
-                  <MarkdownPreview
-                    ref={previewRef}
-                    onScroll={handlePreviewScroll}
-                    content={activeDoc?.content || ''}
-                  />
-                </div>
-              )}
-            </>
-          )}
+                {/* Preview pane */}
+                {(viewMode === 'preview' || viewMode === 'split') && (
+                  <div
+                    className={`h-full overflow-hidden ${
+                      viewMode === 'split' ? 'hidden md:block flex-1' : 'w-full'
+                    }`}
+                  >
+                    <MarkdownPreview
+                      ref={previewRef}
+                      onScroll={handlePreviewScroll}
+                      content={activeDoc?.content || ''}
+                    />
+                  </div>
+                )}
+              </>
+            )}
+          </div>
         </div>
       </main>
 

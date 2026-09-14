@@ -3,6 +3,7 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { db } from '../db';
 import type { DocumentItem, FolderItem, RevisionItem } from '../db/schema';
+import { useSettingsStore } from './useSettingsStore';
 
 const SAMPLE_MARKDOWN = `# Welcome to Dnyx Draft ✨
 
@@ -39,10 +40,31 @@ function greet(name: string): string {
 > "Simplicity is prerequisite for reliability." — Edsger W. Dijkstra
 `;
 
+const SECRET_WORKSPACE_MARKDOWN = `# Welcome to Dnyx Draft 🔐
+
+This folder is your **Secret Workspace** — a place to keep notes you'd rather lock away.
+
+## How locking works
+
+Dnyx Draft can encrypt any document with **AES-256-GCM**, right here in your browser — nothing is ever sent to a server. Open the **Tools** menu → **Document** → **Encrypt Document** to try it on this file.
+
+## ⚠️ One important thing
+
+Locking is **zero-knowledge**: your password is never stored anywhere, not even by us. If you forget it, there is no "reset password" — the content is gone for good. Pick something you'll remember, or write it down somewhere safe.
+
+Once you're comfortable with how it works, this is a good spot to keep anything private: API keys, personal notes, drafts you're not ready to share.
+`;
+
 // Per-document debounce timers — prevents data loss when switching documents quickly.
 const dbSaveTimers: Record<string, ReturnType<typeof setTimeout>> = {};
 
-const TRASH_RETENTION_MS = 30 * 24 * 60 * 60 * 1000; // 30 days
+// Dedupes concurrent initialize() calls — see the comment at its call site.
+let initializeInFlight: Promise<void> | null = null;
+
+// User-configurable via Settings → Storage & Backup (default 30 days).
+function getTrashRetentionMs(): number {
+  return useSettingsStore.getState().trashRetentionDays * 24 * 60 * 60 * 1000;
+}
 
 // Auto-snapshot: track when we last saved a revision per document.
 const lastRevisionTimes: Record<string, number> = {};
@@ -143,6 +165,7 @@ interface WorkspaceState {
   deleteDocument: (id: string, permanent?: boolean) => Promise<void>;
   restoreDocument: (id: string) => Promise<void>;
   emptyTrash: () => Promise<void>;
+  resetWorkspace: () => Promise<void>;
   renameDocument: (id: string, newTitle: string) => Promise<void>;
   duplicateDocument: (id: string) => Promise<string>;
   moveDocument: (docId: string, targetFolderId: string | null) => Promise<void>;
@@ -197,65 +220,99 @@ export const useWorkspaceStore = create<WorkspaceState>()(
       pomodoroGoalWords: 500,
 
       initialize: async () => {
-        if (!db) return;
-        try {
-          let docs = await db.documents.toArray();
-          const folders = await db.folders.toArray();
+        // Dedupe concurrent calls (e.g. React Strict Mode's double-mount in
+        // dev) so the docs.length===0 first-run seeding check can't race
+        // and create duplicate seed content. Cleared in `finally` so a
+        // later, genuinely sequential call (e.g. the sidebar's Refresh
+        // action) still re-runs normally.
+        if (initializeInFlight) return initializeInFlight;
+        initializeInFlight = (async () => {
+          if (!db) return;
+          try {
+            let docs = await db.documents.toArray();
+            const folders = await db.folders.toArray();
 
-          // Auto-expire: permanently remove documents that have been in trash > 30 days.
-          const now = Date.now();
-          const expired = docs.filter(
-            (d) => d.isTrash && d.trashedAt && now - d.trashedAt > TRASH_RETENTION_MS,
-          );
-          if (expired.length > 0) {
-            const expiredIds = expired.map((d) => d.id);
-            if (db) await db.documents.bulkDelete(expiredIds);
-            docs = docs.filter((d) => !expiredIds.includes(d.id));
+            // Auto-expire: permanently remove documents that have been in trash > 30 days.
+            const now = Date.now();
+            const expired = docs.filter(
+              (d) => d.isTrash && d.trashedAt && now - d.trashedAt > getTrashRetentionMs(),
+            );
+            if (expired.length > 0) {
+              const expiredIds = expired.map((d) => d.id);
+              if (db) await db.documents.bulkDelete(expiredIds);
+              docs = docs.filter((d) => !expiredIds.includes(d.id));
+            }
+
+            if (docs.length === 0) {
+              const initialDoc: DocumentItem = {
+                id: nanoid(),
+                title: 'Welcome.md',
+                content: SAMPLE_MARKDOWN,
+                isFavorite: true,
+                isTrash: false,
+                tags: ['welcome', 'guide'],
+                createdAt: Date.now(),
+                updatedAt: Date.now(),
+              };
+
+              const secretFolder: FolderItem = {
+                id: nanoid(),
+                name: 'Secret Workspace',
+                parentId: null,
+                createdAt: Date.now(),
+              };
+              const secretDoc: DocumentItem = {
+                id: nanoid(),
+                title: 'Welcome to Dnyx Draft 🔐',
+                content: SECRET_WORKSPACE_MARKDOWN,
+                folderId: secretFolder.id,
+                isFavorite: false,
+                isTrash: false,
+                isSecret: false,
+                tags: ['guide', 'security'],
+                createdAt: Date.now(),
+                updatedAt: Date.now(),
+              };
+
+              await db.documents.add(initialDoc);
+              await db.folders.add(secretFolder);
+              await db.documents.add(secretDoc);
+
+              set({
+                documents: [initialDoc, secretDoc],
+                folders: [...folders, secretFolder],
+                activeDocumentId: initialDoc.id,
+                openTabs: [initialDoc.id],
+              });
+            } else {
+              const validIds = new Set(docs.map((d) => d.id));
+              const persistedTabs = get().openTabs.filter((id) => validIds.has(id));
+              const persistedActive = get().activeDocumentId;
+
+              const restoredTabs =
+                persistedTabs.length > 0
+                  ? persistedTabs
+                  : ([docs.find((d) => !d.isTrash)?.id].filter(Boolean) as string[]);
+
+              const restoredActive =
+                persistedActive && validIds.has(persistedActive)
+                  ? persistedActive
+                  : restoredTabs[0] || null;
+
+              set({
+                documents: docs,
+                folders,
+                openTabs: restoredTabs,
+                activeDocumentId: restoredActive,
+              });
+            }
+          } catch (err) {
+            console.error('Failed to load IndexedDB workspace:', err);
+          } finally {
+            initializeInFlight = null;
           }
-
-          if (docs.length === 0) {
-            const initialDoc: DocumentItem = {
-              id: nanoid(),
-              title: 'Welcome.md',
-              content: SAMPLE_MARKDOWN,
-              isFavorite: true,
-              isTrash: false,
-              tags: ['welcome', 'guide'],
-              createdAt: Date.now(),
-              updatedAt: Date.now(),
-            };
-            await db.documents.add(initialDoc);
-            set({
-              documents: [initialDoc],
-              folders,
-              activeDocumentId: initialDoc.id,
-              openTabs: [initialDoc.id],
-            });
-          } else {
-            const validIds = new Set(docs.map((d) => d.id));
-            const persistedTabs = get().openTabs.filter((id) => validIds.has(id));
-            const persistedActive = get().activeDocumentId;
-
-            const restoredTabs =
-              persistedTabs.length > 0
-                ? persistedTabs
-                : ([docs.find((d) => !d.isTrash)?.id].filter(Boolean) as string[]);
-
-            const restoredActive =
-              persistedActive && validIds.has(persistedActive)
-                ? persistedActive
-                : restoredTabs[0] || null;
-
-            set({
-              documents: docs,
-              folders,
-              openTabs: restoredTabs,
-              activeDocumentId: restoredActive,
-            });
-          }
-        } catch (err) {
-          console.error('Failed to load IndexedDB workspace:', err);
-        }
+        })();
+        return initializeInFlight;
       },
 
       createDocument: async (
@@ -355,6 +412,18 @@ export const useWorkspaceStore = create<WorkspaceState>()(
           .map((d) => d.id);
         if (db) await db.documents.bulkDelete(trashIds);
         set((state) => ({ documents: state.documents.filter((d) => !d.isTrash) }));
+      },
+
+      // Settings → Storage & Backup "Reset Workspace": permanently wipes all
+      // documents/folders/revisions and re-seeds the first-run content.
+      resetWorkspace: async () => {
+        if (!db) return;
+        await db.documents.clear();
+        await db.folders.clear();
+        await db.revisions.clear();
+        set({ documents: [], folders: [], openTabs: [], activeDocumentId: null });
+        initializeInFlight = null;
+        await get().initialize();
       },
 
       renameDocument: async (id, newTitle) => {

@@ -9,10 +9,12 @@ import {
   Command,
   Edit3,
   Eye,
+  EyeOff,
   FileDown,
   FolderInput,
   GanttChart,
   History,
+  Info,
   LayoutTemplate,
   Lock,
   Maximize,
@@ -26,6 +28,7 @@ import {
   Sun,
   Tv,
   Unlock,
+  Wifi,
 } from 'lucide-react';
 import Link from 'next/link';
 import { useTheme } from 'next-themes';
@@ -46,6 +49,7 @@ import { useSettingsStore } from '@/lib/store/useSettingsStore';
 import { useWorkspaceStore } from '@/lib/store/useWorkspaceStore';
 import { formatMarkdownTables } from '@/lib/utils/markdown-formatter';
 import { GithubIcon } from '../icons/GithubIcon';
+import { AboutModal } from '../modals/AboutModal';
 import { CommandPaletteModal } from '../modals/CommandPaletteModal';
 import { CommentsModal } from '../modals/CommentsModal';
 import { DocumentDiagnosticsModal } from '../modals/DocumentDiagnosticsModal';
@@ -75,7 +79,7 @@ export const AppHeader: React.FC = () => {
     createDocument,
   } = useWorkspaceStore();
   const { theme, resolvedTheme, setTheme } = useTheme();
-  const { lastSeenVersion, setLastSeenVersion } = useSettingsStore();
+  const { lastSeenVersion, setLastSeenVersion, privateMode, setPrivateMode } = useSettingsStore();
   const [mounted, setMounted] = useState(false);
   const activeDoc = documents.find((d) => d.id === activeDocumentId);
 
@@ -104,6 +108,7 @@ export const AppHeader: React.FC = () => {
   const [templateOpen, setTemplateOpen] = useState(false);
   const [presentationOpen, setPresentationOpen] = useState(false);
   const [diagnosticsOpen, setDiagnosticsOpen] = useState(false);
+  const [aboutOpen, setAboutOpen] = useState(false);
   const [trashOpen, setTrashOpen] = useState(false);
   const [commentsOpen, setCommentsOpen] = useState(false);
   const [releaseNotesOpen, setReleaseNotesOpen] = useState(false);
@@ -318,6 +323,19 @@ export const AppHeader: React.FC = () => {
             <span className="hidden sm:inline">Export</span>
           </Button>
 
+          {/* Live Share — real-time collaboration, distinct from static Share */}
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={() => setLiveShareOpen(true)}
+            className="text-xs h-8 border-emerald-300 dark:border-emerald-800 text-emerald-700 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-950/40"
+            title="Live Share — real-time collaborative editing"
+          >
+            <Wifi className="h-3.5 w-3.5 sm:mr-1" />
+            <span className="hidden sm:inline">Live Share</span>
+          </Button>
+
           {/* Share — primary CTA */}
           <Button
             type="button"
@@ -325,6 +343,7 @@ export const AppHeader: React.FC = () => {
             size="sm"
             onClick={() => setShareOpen(true)}
             className="text-xs h-8 bg-blue-600 hover:bg-blue-700 text-white font-medium shadow-xs shadow-blue-500/20"
+            title="Share document (export link, embed, etc.)"
           >
             <Share2 className="h-3.5 w-3.5 sm:mr-1" />
             <span className="hidden sm:inline">Share</span>
@@ -414,6 +433,15 @@ export const AppHeader: React.FC = () => {
                 <Activity className="text-emerald-500" />
                 Diagnostics & Analytics
               </DropdownMenuItem>
+
+              <DropdownMenuSeparator />
+              <DropdownMenuLabel>Help</DropdownMenuLabel>
+              <DropdownMenuSeparator />
+
+              <DropdownMenuItem onClick={() => setAboutOpen(true)}>
+                <Info className="text-blue-500" />
+                About Dnyx Draft
+              </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
 
@@ -453,6 +481,22 @@ export const AppHeader: React.FC = () => {
               </Button>
             </TooltipTrigger>
             <TooltipContent>Toggle {isDark ? 'Light' : 'Dark'} Mode</TooltipContent>
+          </Tooltip>
+
+          {/* Private Mode — instant screen-privacy toggle */}
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon"
+                onClick={() => setPrivateMode(!privateMode)}
+                className={`h-8 w-8 ${privateMode ? 'text-blue-600 dark:text-blue-400' : 'text-slate-600 dark:text-slate-400 hover:text-blue-500 dark:hover:text-blue-400'}`}
+              >
+                {privateMode ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>{privateMode ? 'Exit Private Mode' : 'Private Mode'}</TooltipContent>
           </Tooltip>
 
           {/* Settings */}
@@ -508,6 +552,7 @@ export const AppHeader: React.FC = () => {
         title={activeDoc?.title || 'Document'}
       />
       <TrashModal open={trashOpen} onOpenChange={setTrashOpen} />
+      <AboutModal open={aboutOpen} onOpenChange={setAboutOpen} />
       <CommentsModal open={commentsOpen} onOpenChange={setCommentsOpen} />
       <ReleaseNotesModal open={releaseNotesOpen} onOpenChange={setReleaseNotesOpen} />
       <LiveShareModal open={liveShareOpen} onOpenChange={setLiveShareOpen} />

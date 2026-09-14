@@ -1,6 +1,6 @@
 {
   "name": "dnyx-draft-monorepo",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "private": true,
   "license": "MIT",
   "description": "Local-first Markdown workspace with live preview, multi-format file viewing, a BYOK AI writing assistant, and zero-login IndexedDB storage.",

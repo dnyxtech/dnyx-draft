@@ -303,6 +303,9 @@ importers:
       turndown:
         specifier: ^7.2.0
         version: 7.2.4
+      unist-util-visit:
+        specifier: ^5.1.0
+        version: 5.1.0
       vega-embed:
         specifier: ^7.1.0
         version: 7.1.0(vega-lite@6.4.3(vega@6.4.0))(vega@6.4.0)

@@ -3,10 +3,23 @@
 import { ExternalLink, Megaphone, X } from 'lucide-react';
 import type React from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { CHANGELOG_URL } from '@/lib/constants';
 
-const APP_VERSION = '1.1.0';
+const APP_VERSION = '1.2.0';
 
 const RELEASE_NOTES = [
+  {
+    version: '1.2.0',
+    date: '2026-09-14',
+    highlights: [
+      'New: Secret Workspace — a seeded folder showing off zero-knowledge document locking, unlocked by default with instructions',
+      'New: Diagrams & More rebuilt — 5 categories (Flowcharts, Mind Maps, Data Viz, Technical Notation, 3D & Maps) with live preview, editable code, and reference/citation fields before insert',
+      'New: Markdown alert blocks (Note/Tip/Important/Warning/Caution), a Symbols & HTML Entities picker, horizontal rule and copy-document toolbar buttons',
+      'New: Live Share is now easy to find in the top bar, with a clearer edit/view access toggle',
+      'New: About Dnyx Draft — license, changelog, FAQ, and one-click "Report an Issue" prefilled with your app version',
+      'New: Settings → Storage & Backup (configurable trash retention, clear browser data, reset workspace) and a one-click Private Mode screen-blur toggle',
+    ],
+  },
   {
     version: '1.1.0',
     date: '2026-09-14',
@@ -170,7 +183,7 @@ export const ReleaseNotesModal: React.FC<ReleaseNotesModalProps> = ({ open, onOp
 
         <div className="px-5 py-3 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between">
           <a
-            href="https://github.com/dnyxtech/dnyx-draft/blob/main/CHANGELOG.md"
+            href={CHANGELOG_URL}
             target="_blank"
             rel="noreferrer"
             className="flex items-center gap-1.5 text-xs text-slate-500 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"

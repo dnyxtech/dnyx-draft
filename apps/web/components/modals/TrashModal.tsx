@@ -12,6 +12,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
+import { useSettingsStore } from '@/lib/store/useSettingsStore';
 import { useWorkspaceStore } from '@/lib/store/useWorkspaceStore';
 
 interface TrashModalProps {
@@ -19,13 +20,12 @@ interface TrashModalProps {
   onOpenChange: (open: boolean) => void;
 }
 
-const TRASH_RETENTION_DAYS = 30;
 const MS_PER_DAY = 24 * 60 * 60 * 1000;
 
-function daysUntilExpiry(trashedAt?: number): number | null {
+function daysUntilExpiry(trashedAt: number | undefined, retentionDays: number): number | null {
   if (!trashedAt) return null;
   const elapsed = Date.now() - trashedAt;
-  const remaining = TRASH_RETENTION_DAYS - Math.floor(elapsed / MS_PER_DAY);
+  const remaining = retentionDays - Math.floor(elapsed / MS_PER_DAY);
   return Math.max(0, remaining);
 }
 
@@ -39,6 +39,7 @@ function formatDate(ts: number) {
 
 export const TrashModal: React.FC<TrashModalProps> = ({ open, onOpenChange }) => {
   const { documents, restoreDocument, deleteDocument, emptyTrash } = useWorkspaceStore();
+  const { trashRetentionDays } = useSettingsStore();
   const trashedDocs = documents.filter((d) => d.isTrash);
   const [selected, setSelected] = useState<Set<string>>(new Set());
 
@@ -126,8 +127,8 @@ export const TrashModal: React.FC<TrashModalProps> = ({ open, onOpenChange }) =>
             Trash
           </DialogTitle>
           <DialogDescription className="text-xs">
-            Items are permanently deleted after {TRASH_RETENTION_DAYS} days. Select multiple items
-            for batch actions.
+            Items are permanently deleted after {trashRetentionDays} days. Select multiple items for
+            batch actions.
           </DialogDescription>
         </DialogHeader>
 
@@ -157,7 +158,7 @@ export const TrashModal: React.FC<TrashModalProps> = ({ open, onOpenChange }) =>
               </div>
 
               {trashedDocs.map((doc) => {
-                const days = daysUntilExpiry(doc.trashedAt);
+                const days = daysUntilExpiry(doc.trashedAt, trashRetentionDays);
                 const isUrgent = days !== null && days <= 3;
                 return (
                   <div

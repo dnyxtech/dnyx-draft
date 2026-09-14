@@ -41,6 +41,7 @@ import {
   type PreviewTheme,
   useSettingsStore,
 } from '@/lib/store/useSettingsStore';
+import { useWorkspaceStore } from '@/lib/store/useWorkspaceStore';
 import { cn } from '@/lib/utils';
 
 const LANGUAGES: { value: AppLanguage; label: string; native: string }[] = [
@@ -233,6 +234,142 @@ function AiSection() {
   );
 }
 
+type DestructiveAction = 'reset-workspace' | 'clear-data' | null;
+
+function StorageBackupSection({
+  trashRetentionDays,
+  setTrashRetentionDays,
+}: {
+  trashRetentionDays: number;
+  setTrashRetentionDays: (days: number) => void;
+}) {
+  const { resetWorkspace } = useWorkspaceStore();
+  const [pending, setPending] = useState<DestructiveAction>(null);
+  const [confirmText, setConfirmText] = useState('');
+  const [working, setWorking] = useState(false);
+
+  const confirmWord = pending === 'reset-workspace' ? 'RESET' : 'DELETE';
+
+  const cancel = () => {
+    setPending(null);
+    setConfirmText('');
+  };
+
+  const handleConfirm = async () => {
+    if (confirmText !== confirmWord) return;
+    setWorking(true);
+    try {
+      if (pending === 'reset-workspace') {
+        await resetWorkspace();
+        toast.success('Workspace reset — starting fresh.');
+        cancel();
+      } else if (pending === 'clear-data') {
+        const { clearAllBrowserData } = await import('@/lib/utils/clear-browser-data');
+        await clearAllBrowserData(); // reloads the page on success
+      }
+    } catch {
+      toast.error('Something went wrong — please try again.');
+      setWorking(false);
+    }
+  };
+
+  return (
+    <section className="space-y-3 pt-2 border-t border-slate-200 dark:border-slate-800">
+      <p className="text-[11px] font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500">
+        Storage &amp; Backup
+      </p>
+
+      <div className="flex items-center justify-between">
+        <div>
+          <span className="text-xs font-medium text-slate-700 dark:text-slate-300">
+            Trash retention
+          </span>
+          <p className="text-[10px] text-slate-400">
+            Deleted documents stay in Trash before being permanently removed
+          </p>
+        </div>
+        <div className="flex items-center gap-1.5">
+          <input
+            type="number"
+            min={1}
+            max={365}
+            value={trashRetentionDays}
+            onChange={(e) => {
+              const v = Math.min(365, Math.max(1, Number(e.target.value) || 1));
+              setTrashRetentionDays(v);
+            }}
+            className="w-16 px-2 py-1 text-xs text-right rounded-md border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-200 outline-none focus:border-blue-500"
+          />
+          <span className="text-xs text-slate-400">days</span>
+        </div>
+      </div>
+
+      <div className="space-y-2 pt-1">
+        {pending === null ? (
+          <>
+            <button
+              type="button"
+              onClick={() => setPending('reset-workspace')}
+              className="w-full flex items-center justify-between px-3 py-2 rounded-md border border-amber-200 dark:border-amber-900 bg-amber-50 dark:bg-amber-950/30 text-left hover:bg-amber-100 dark:hover:bg-amber-950/50 transition-colors"
+            >
+              <span className="text-xs font-medium text-amber-700 dark:text-amber-400">
+                Reset Workspace
+              </span>
+              <span className="text-[10px] text-amber-600 dark:text-amber-500">
+                Deletes all documents & folders
+              </span>
+            </button>
+            <button
+              type="button"
+              onClick={() => setPending('clear-data')}
+              className="w-full flex items-center justify-between px-3 py-2 rounded-md border border-red-200 dark:border-red-900 bg-red-50 dark:bg-red-950/30 text-left hover:bg-red-100 dark:hover:bg-red-950/50 transition-colors"
+            >
+              <span className="text-xs font-medium text-red-700 dark:text-red-400">
+                Clear Browser Data
+              </span>
+              <span className="text-[10px] text-red-600 dark:text-red-500">
+                Wipes everything, including settings
+              </span>
+            </button>
+          </>
+        ) : (
+          <div className="rounded-md border border-red-200 dark:border-red-900 bg-red-50 dark:bg-red-950/30 p-3 space-y-2">
+            <p className="text-xs text-red-700 dark:text-red-400">
+              {pending === 'reset-workspace'
+                ? 'This permanently deletes every document and folder in your workspace. This cannot be undone.'
+                : 'This wipes all documents, files, settings, and cached data — as if you never visited this site. This cannot be undone.'}
+            </p>
+            <p className="text-[11px] text-slate-600 dark:text-slate-400">
+              Type <span className="font-mono font-bold">{confirmWord}</span> to confirm.
+            </p>
+            <div className="flex gap-2">
+              <input
+                type="text"
+                value={confirmText}
+                onChange={(e) => setConfirmText(e.target.value)}
+                placeholder={confirmWord}
+                className="flex-1 px-2.5 py-1.5 text-xs rounded-md border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-200 outline-none focus:border-red-500"
+              />
+              <Button
+                type="button"
+                variant="destructive"
+                size="sm"
+                disabled={confirmText !== confirmWord || working}
+                onClick={handleConfirm}
+              >
+                {working ? 'Working…' : 'Confirm'}
+              </Button>
+              <Button type="button" variant="outline" size="sm" onClick={cancel}>
+                Cancel
+              </Button>
+            </div>
+          </div>
+        )}
+      </div>
+    </section>
+  );
+}
+
 export const SettingsModal: React.FC<SettingsModalProps> = ({ open, onOpenChange }) => {
   const {
     fontSize,
@@ -265,6 +402,10 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ open, onOpenChange
     setLanguage,
     textDirection,
     setTextDirection,
+    trashRetentionDays,
+    setTrashRetentionDays,
+    privateMode,
+    setPrivateMode,
   } = useSettingsStore();
   const { theme, setTheme } = useTheme();
 
@@ -282,6 +423,9 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ open, onOpenChange
         </DialogHeader>
 
         <div className="space-y-5 pt-2 max-h-[65vh] overflow-y-auto pr-1">
+          <p className="text-[11px] font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500">
+            Appearance
+          </p>
           {/* App Color Theme */}
           <section>
             <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-2">
@@ -592,7 +736,24 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ open, onOpenChange
               </div>
               <Switch checked={vimMode} onCheckedChange={setVimMode} />
             </label>
+
+            <label className="flex items-center justify-between cursor-pointer">
+              <div>
+                <span className="text-xs font-medium text-slate-700 dark:text-slate-300">
+                  Private Mode
+                </span>
+                <p className="text-[10px] text-slate-400">
+                  Instantly blur the sidebar and document — for when someone walks by
+                </p>
+              </div>
+              <Switch checked={privateMode} onCheckedChange={setPrivateMode} />
+            </label>
           </section>
+
+          <StorageBackupSection
+            trashRetentionDays={trashRetentionDays}
+            setTrashRetentionDays={setTrashRetentionDays}
+          />
 
           <AiSection />
         </div>

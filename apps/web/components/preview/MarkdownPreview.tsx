@@ -10,9 +10,10 @@ import rehypeSanitize, { defaultSchema } from 'rehype-sanitize';
 import remarkEmoji from 'remark-emoji';
 import remarkGfm from 'remark-gfm';
 import remarkMath from 'remark-math';
+import { visit } from 'unist-util-visit';
 import 'katex/dist/katex.min.css';
 import 'highlight.js/styles/github-dark.min.css';
-import { Check, Copy, Link2, Palette } from 'lucide-react';
+import { AlertTriangle, Check, Copy, Info, Lightbulb, Link2, Palette } from 'lucide-react';
 import { db } from '@/lib/db';
 import { type PreviewTheme, useSettingsStore } from '@/lib/store/useSettingsStore';
 import { useWorkspaceStore } from '@/lib/store/useWorkspaceStore';
@@ -59,9 +60,105 @@ const sanitizeSchema = {
     ...defaultSchema.protocols,
     src: [...(defaultSchema.protocols?.src ?? []), 'dnyx-blob'],
   },
+  attributes: {
+    ...defaultSchema.attributes,
+    blockquote: [...(defaultSchema.attributes?.blockquote ?? []), 'dataAlert'],
+  },
 };
 
 const INLINE_BLOB_PREFIX = 'dnyx-blob:';
+
+const ALERT_TYPES = ['NOTE', 'TIP', 'IMPORTANT', 'WARNING', 'CAUTION'] as const;
+type AlertType = (typeof ALERT_TYPES)[number];
+const ALERT_MARKER_RE = /^\[!(NOTE|TIP|IMPORTANT|WARNING|CAUTION)\]\s*\n?/;
+
+interface MdastText {
+  type: 'text';
+  value: string;
+}
+interface MdastParagraph {
+  type: 'paragraph';
+  children: unknown[];
+}
+interface MdastBlockquote {
+  type: 'blockquote';
+  children: unknown[];
+  data?: { hProperties?: Record<string, unknown> };
+}
+
+// GitHub-style alert blocks: `> [!NOTE]\n> message`. Strips the marker from
+// the rendered text and tags the blockquote with a `data-alert` attribute
+// the custom `blockquote` component below reads to render a styled callout
+// instead of a plain quote.
+function remarkAlerts() {
+  // biome-ignore lint/suspicious/noExplicitAny: unist tree shape from remark-parse, not worth importing mdast types for one plugin
+  return (tree: any) => {
+    visit(tree, 'blockquote', (node: MdastBlockquote) => {
+      const firstChild = node.children?.[0] as MdastParagraph | undefined;
+      if (firstChild?.type !== 'paragraph') return;
+      const firstText = firstChild.children?.[0] as MdastText | undefined;
+      if (firstText?.type !== 'text') return;
+      const match = ALERT_MARKER_RE.exec(firstText.value);
+      if (!match) return;
+      firstText.value = firstText.value.slice(match[0].length);
+      node.data = { ...node.data, hProperties: { ...node.data?.hProperties, dataAlert: match[1] } };
+    });
+  };
+}
+
+const ALERT_STYLES: Record<
+  AlertType,
+  { icon: React.ComponentType<{ className?: string }>; classes: string }
+> = {
+  NOTE: {
+    icon: Info,
+    classes:
+      'border-blue-400 bg-blue-50 dark:bg-blue-950/30 text-blue-800 dark:text-blue-200 [&_svg]:text-blue-500',
+  },
+  TIP: {
+    icon: Lightbulb,
+    classes:
+      'border-emerald-400 bg-emerald-50 dark:bg-emerald-950/30 text-emerald-800 dark:text-emerald-200 [&_svg]:text-emerald-500',
+  },
+  IMPORTANT: {
+    icon: AlertTriangle,
+    classes:
+      'border-purple-400 bg-purple-50 dark:bg-purple-950/30 text-purple-800 dark:text-purple-200 [&_svg]:text-purple-500',
+  },
+  WARNING: {
+    icon: AlertTriangle,
+    classes:
+      'border-amber-400 bg-amber-50 dark:bg-amber-950/30 text-amber-800 dark:text-amber-200 [&_svg]:text-amber-500',
+  },
+  CAUTION: {
+    icon: AlertTriangle,
+    classes:
+      'border-rose-400 bg-rose-50 dark:bg-rose-950/30 text-rose-800 dark:text-rose-200 [&_svg]:text-rose-500',
+  },
+};
+
+function AlertBlockquote({
+  'data-alert': dataAlert,
+  children,
+  ...props
+}: React.BlockquoteHTMLAttributes<HTMLQuoteElement> & { 'data-alert'?: string }) {
+  const alertType = ALERT_TYPES.includes(dataAlert as AlertType) ? (dataAlert as AlertType) : null;
+  if (!alertType) {
+    return <blockquote {...props}>{children}</blockquote>;
+  }
+  const { icon: Icon, classes } = ALERT_STYLES[alertType];
+  return (
+    <div className={cn('flex gap-2 rounded-md border-l-4 px-3 py-2 my-3 text-sm', classes)}>
+      <Icon className="h-4 w-4 shrink-0 mt-0.5" />
+      <div className="flex-1 min-w-0 [&>p]:m-0">
+        <p className="font-semibold text-xs uppercase tracking-wide mb-1">
+          {alertType.charAt(0) + alertType.slice(1).toLowerCase()}
+        </p>
+        {children}
+      </div>
+    </div>
+  );
+}
 
 // react-markdown runs its own URL sanitizer (independent of rehype-sanitize)
 // with a hardcoded protocol allowlist that doesn't include custom schemes.
@@ -373,7 +470,12 @@ export const MarkdownPreview = forwardRef<HTMLDivElement, MarkdownPreviewProps>(
 
           <div className={cn('mx-auto markdown-body', getThemeContentClass(previewTheme))}>
             <ReactMarkdown
-              remarkPlugins={[remarkGfm, remarkMath, [remarkEmoji, { accessible: true }]]}
+              remarkPlugins={[
+                remarkGfm,
+                remarkMath,
+                [remarkEmoji, { accessible: true }],
+                remarkAlerts,
+              ]}
               rehypePlugins={[
                 rehypeRaw,
                 [rehypeSanitize, sanitizeSchema],
@@ -383,6 +485,7 @@ export const MarkdownPreview = forwardRef<HTMLDivElement, MarkdownPreviewProps>(
               urlTransform={urlTransform}
               components={{
                 img: InlineBlobImage,
+                blockquote: AlertBlockquote,
                 a({ href, children, ...props }) {
                   if (href?.startsWith('#wikilink:')) {
                     const docTitle = decodeURIComponent(href.replace('#wikilink:', ''));

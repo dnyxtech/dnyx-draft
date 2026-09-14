@@ -10,7 +10,9 @@ import {
   Bot,
   CheckSquare,
   Code,
+  Copy,
   FileSpreadsheet,
+  Hash,
   Heading1,
   Heading2,
   Heading3,
@@ -26,6 +28,7 @@ import {
   Loader2,
   Mic,
   MicOff,
+  Minus,
   Quote,
   Search,
   Shapes,
@@ -51,9 +54,10 @@ import { useSettingsStore } from '@/lib/store/useSettingsStore';
 import { useWorkspaceStore } from '@/lib/store/useWorkspaceStore';
 import { formatMarkdownDocument } from '@/lib/utils/markdown-formatter';
 import { DataConverterModal } from '../modals/DataConverterModal';
+import { DiagramsModal } from '../modals/DiagramsModal';
 import { EmojiPickerModal } from '../modals/EmojiPickerModal';
-import { InsertDiagramModal } from '../modals/InsertDiagramModal';
 import { InsertMediaModal } from '../modals/InsertMediaModal';
+import { SymbolsModal } from '../modals/SymbolsModal';
 import { TableBuilderModal } from '../modals/TableBuilderModal';
 
 interface EditorToolbarProps {
@@ -83,6 +87,7 @@ export const EditorToolbar: React.FC<EditorToolbarProps> = ({
   const [tableModalOpen, setTableModalOpen] = useState(false);
   const [converterModalOpen, setConverterModalOpen] = useState(false);
   const [emojiPickerOpen, setEmojiPickerOpen] = useState(false);
+  const [symbolsOpen, setSymbolsOpen] = useState(false);
   const [diagramModalOpen, setDiagramModalOpen] = useState(false);
   const [mediaModalOpen, setMediaModalOpen] = useState(false);
   const [isListening, setIsListening] = useState(false);
@@ -103,6 +108,19 @@ export const EditorToolbar: React.FC<EditorToolbarProps> = ({
     const formatted = formatMarkdownDocument(activeDoc.content);
     updateDocument(activeDoc.id, { content: formatted });
     toast.success('Aligned tables and formatted document');
+  };
+
+  const handleCopyDocument = async () => {
+    if (!activeDoc?.content) {
+      toast.error('Nothing to copy yet!');
+      return;
+    }
+    try {
+      await navigator.clipboard.writeText(activeDoc.content);
+      toast.success('Document copied to clipboard!');
+    } catch {
+      toast.error('Could not access clipboard');
+    }
   };
 
   const handleQuickTable = useCallback(
@@ -527,6 +545,16 @@ export const EditorToolbar: React.FC<EditorToolbarProps> = ({
           >
             <ImageIcon className="h-3.5 w-3.5" />
           </Button>
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon"
+            className="h-7 w-7 text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-slate-100"
+            onClick={() => onInsert('\n---\n\n', '')}
+            title="Insert Horizontal Rule"
+          >
+            <Minus className="h-3.5 w-3.5" />
+          </Button>
         </div>
 
         <div className="h-4 w-px bg-slate-200 dark:bg-slate-800 mx-1" />
@@ -711,6 +739,18 @@ export const EditorToolbar: React.FC<EditorToolbarProps> = ({
             <Laugh className="h-3.5 w-3.5" />
           </Button>
 
+          {/* Symbols & HTML Entities */}
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon"
+            className="h-7 w-7 text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-slate-100"
+            onClick={() => setSymbolsOpen(true)}
+            title="Symbols & HTML Entities"
+          >
+            <Hash className="h-3.5 w-3.5" />
+          </Button>
+
           {/* Insert Diagram */}
           <Button
             type="button"
@@ -718,7 +758,7 @@ export const EditorToolbar: React.FC<EditorToolbarProps> = ({
             size="icon"
             className="h-7 w-7 text-violet-600 dark:text-violet-400 hover:bg-violet-50 dark:hover:bg-violet-950/60"
             onClick={() => setDiagramModalOpen(true)}
-            title="Insert Diagram"
+            title="Diagrams & More"
           >
             <Shapes className="h-3.5 w-3.5" />
           </Button>
@@ -819,6 +859,20 @@ export const EditorToolbar: React.FC<EditorToolbarProps> = ({
           </div>
         </div>
 
+        <div className="h-4 w-px bg-slate-200 dark:bg-slate-800 mx-1" />
+
+        <Button
+          type="button"
+          variant="ghost"
+          size="icon"
+          className="h-7 w-7 text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-slate-100"
+          onClick={handleCopyDocument}
+          disabled={!activeDoc?.content}
+          title="Copy Document"
+        >
+          <Copy className="h-3.5 w-3.5" />
+        </Button>
+
         {/* Selection stats */}
         {selectionStats && (
           <>
@@ -846,10 +900,15 @@ export const EditorToolbar: React.FC<EditorToolbarProps> = ({
         onOpenChange={setEmojiPickerOpen}
         onSelect={(emoji) => onInsert(emoji, '')}
       />
-      <InsertDiagramModal
+      <SymbolsModal
+        open={symbolsOpen}
+        onOpenChange={setSymbolsOpen}
+        onSelect={(char) => onInsert(char, '')}
+      />
+      <DiagramsModal
         open={diagramModalOpen}
         onOpenChange={setDiagramModalOpen}
-        onInsert={(template) => onInsert(template, '')}
+        onInsert={(block) => onInsert(block, '')}
       />
       <InsertMediaModal
         open={mediaModalOpen}
