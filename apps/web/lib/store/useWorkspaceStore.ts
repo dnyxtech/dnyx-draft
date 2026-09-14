@@ -169,6 +169,7 @@ interface WorkspaceState {
   setPomodoroGoalWords: (words: number) => void;
   incrementDailyWords: (count: number) => void;
   createBlobDocument: (file: File) => Promise<string>;
+  createInlineBlob: (file: File) => Promise<string>;
 }
 
 export const useWorkspaceStore = create<WorkspaceState>()(
@@ -606,6 +607,20 @@ export const useWorkspaceStore = create<WorkspaceState>()(
         }
 
         return newDoc.id;
+      },
+
+      createInlineBlob: async (file) => {
+        if (!db) throw new Error('Database not available');
+        const blobId = nanoid();
+        const arrayBuffer = await file.arrayBuffer();
+        await db.blobs.add({
+          id: blobId,
+          name: file.name,
+          mimeType: file.type || 'application/octet-stream',
+          data: arrayBuffer,
+          createdAt: Date.now(),
+        });
+        return blobId;
       },
     }),
     {

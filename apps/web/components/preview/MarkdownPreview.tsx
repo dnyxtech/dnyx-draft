@@ -2,7 +2,7 @@
 
 import type React from 'react';
 import { forwardRef, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
-import ReactMarkdown from 'react-markdown';
+import ReactMarkdown, { defaultUrlTransform } from 'react-markdown';
 import rehypeHighlight from 'rehype-highlight';
 import rehypeKatex from 'rehype-katex';
 import rehypeRaw from 'rehype-raw';
@@ -13,6 +13,7 @@ import remarkMath from 'remark-math';
 import 'katex/dist/katex.min.css';
 import 'highlight.js/styles/github-dark.min.css';
 import { Check, Copy, Link2, Palette } from 'lucide-react';
+import { db } from '@/lib/db';
 import { type PreviewTheme, useSettingsStore } from '@/lib/store/useSettingsStore';
 import { useWorkspaceStore } from '@/lib/store/useWorkspaceStore';
 import { cn } from '@/lib/utils';
@@ -47,11 +48,119 @@ const THEME_CLASSES: Record<PreviewTheme, string> = {
   serif: 'preview-theme-serif',
 };
 
-// Allow safe custom tags while blocking dangerous elements.
+// Allow safe custom tags while blocking dangerous elements. Also allow the
+// `dnyx-blob:` protocol on img[src] so locally-stored inline images (see
+// InlineBlobImage below) aren't stripped by the sanitizer before they reach
+// the custom img renderer.
 const sanitizeSchema = {
   ...defaultSchema,
   tagNames: [...(defaultSchema.tagNames ?? []), 'mark', 'sup', 'sub'],
+  protocols: {
+    ...defaultSchema.protocols,
+    src: [...(defaultSchema.protocols?.src ?? []), 'dnyx-blob'],
+  },
 };
+
+const INLINE_BLOB_PREFIX = 'dnyx-blob:';
+
+// react-markdown runs its own URL sanitizer (independent of rehype-sanitize)
+// with a hardcoded protocol allowlist that doesn't include custom schemes.
+// Let `dnyx-blob:` URIs through; defer to the default behavior otherwise.
+function urlTransform(value: string): string {
+  return value.startsWith(INLINE_BLOB_PREFIX) ? value : defaultUrlTransform(value);
+}
+
+// Reference-counted cache of resolved object URLs, keyed by blobId, so the
+// same inline image referenced multiple times (or re-rendered) doesn't
+// re-fetch from Dexie or leak duplicate object URLs. Revoked once the last
+// consumer unmounts.
+const inlineBlobUrlCache = new Map<string, { url: string; refCount: number }>();
+
+function useInlineBlobUrl(blobId: string | null) {
+  const [state, setState] = useState<{ url: string | null; status: 'loading' | 'ready' | 'error' }>(
+    { url: null, status: 'loading' },
+  );
+
+  useEffect(() => {
+    if (!blobId) {
+      setState({ url: null, status: 'error' });
+      return;
+    }
+
+    const cached = inlineBlobUrlCache.get(blobId);
+    if (cached) {
+      cached.refCount++;
+      setState({ url: cached.url, status: 'ready' });
+      return () => {
+        cached.refCount--;
+        if (cached.refCount <= 0) {
+          URL.revokeObjectURL(cached.url);
+          inlineBlobUrlCache.delete(blobId);
+        }
+      };
+    }
+
+    let cancelled = false;
+    setState({ url: null, status: 'loading' });
+
+    (async () => {
+      if (!db) return;
+      const blob = await db.blobs.get(blobId);
+      if (cancelled) return;
+      if (!blob) {
+        setState({ url: null, status: 'error' });
+        return;
+      }
+      const url = URL.createObjectURL(new Blob([blob.data], { type: blob.mimeType }));
+      inlineBlobUrlCache.set(blobId, { url, refCount: 1 });
+      setState({ url, status: 'ready' });
+    })();
+
+    return () => {
+      cancelled = true;
+      const entry = inlineBlobUrlCache.get(blobId);
+      if (entry) {
+        entry.refCount--;
+        if (entry.refCount <= 0) {
+          URL.revokeObjectURL(entry.url);
+          inlineBlobUrlCache.delete(blobId);
+        }
+      }
+    };
+  }, [blobId]);
+
+  return state;
+}
+
+function InlineBlobImage({
+  src,
+  alt,
+  ...props
+}: Omit<React.ImgHTMLAttributes<HTMLImageElement>, 'src'> & { src?: string | Blob }) {
+  const srcString = typeof src === 'string' ? src : undefined;
+  const isInlineBlob = srcString?.startsWith(INLINE_BLOB_PREFIX) ?? false;
+  const blobId = isInlineBlob ? (srcString as string).slice(INLINE_BLOB_PREFIX.length) : null;
+  const { url, status } = useInlineBlobUrl(blobId);
+
+  if (!isInlineBlob) {
+    return <img src={srcString} alt={alt} {...props} />;
+  }
+  if (status === 'loading') {
+    return (
+      <span className="inline-block px-3 py-2 text-xs text-slate-400 bg-slate-100 dark:bg-slate-800 rounded">
+        Loading image…
+      </span>
+    );
+  }
+  if (status === 'error' || !url) {
+    return (
+      <span className="inline-block px-3 py-2 text-xs text-red-500 bg-red-50 dark:bg-red-950/40 rounded">
+        Image not found
+      </span>
+    );
+  }
+  return <img src={url} alt={alt} {...props} />;
+}
 
 // Highlight find query matches in plain text content
 function highlightMatches(text: string, query: string): React.ReactNode {
@@ -271,7 +380,9 @@ export const MarkdownPreview = forwardRef<HTMLDivElement, MarkdownPreviewProps>(
                 rehypeKatex,
                 rehypeHighlight,
               ]}
+              urlTransform={urlTransform}
               components={{
+                img: InlineBlobImage,
                 a({ href, children, ...props }) {
                   if (href?.startsWith('#wikilink:')) {
                     const docTitle = decodeURIComponent(href.replace('#wikilink:', ''));

@@ -68,42 +68,113 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ---
 
-## [0.2.0] - 2026-08-31
+## [0.0.4] - 2026-09-03
+
+### Added
+- **Workspace Safety & Trash**: document-scoped, revision-aware persistence replacing unsafe whole-workspace write paths; preserved conflict copies, interrupted edits, and orphaned content; transactional browser backup and Secret Workspace replacement; journaled desktop moves and index writes; responsive, multi-select Trash for normal and encrypted documents with safe 30-day retention.
+- **Markdown Editing & Rendering**: grammar-aware parsing for math, footnotes, headings, definition lists, code, and adjacent lists, replacing document-wide formatting rewrites; accessible 8×8 quick table selector plus a custom table dialog; refined toolbar icons.
+- **Preview & Review Reliability**: per-document Preview scroll position; stabilized comment highlights across complete and formatted nodes; blocked link navigation while selecting comments; preserved linked-image and commented-image geometry.
+- **Export Appearance & Rich Content**: remembered Light/Dark appearance controls for HTML, browser-print PDF, raster PDF, and PNG exports; every supported diagram and rich-content type rendered before capture; Markmaps fitted to printable bounds without changing the visible app theme.
+- **Search, Performance & Collaboration**: all 15 localized URLs independently indexable with canonical, hreflang, social, structured-data, and sitemap coverage; Bulgarian and Google verification metadata; real redirect/404 handling; restored production Live Share WebSocket routing through Cloudflare Pages Functions.
+
+### Changed
+- Kept maps and STL diagram viewers responsive during the Markdown parsing rework.
+- Corrected dark/light rendering of tables, alerts, dividers, backgrounds, and frontmatter in exports.
+
+### Fixed
+- Preserved editor selections when opening the context menu.
+
+---
+
+## [0.0.3] - 2026-09-01
+
+### Added
+- **Comments & Collaboration**: selection-first anchored comments; synchronized document highlights and thread cards; nested editable replies; clearer open/resolved states; responsive panel layouts; Live Share identities that follow participant name changes, including for view-only collaborators.
+- **Interface & Editing**: familiar formatting, navigation, file, view, and fullscreen keyboard shortcuts across web and desktop where browser-reserved keys permit.
+- **Release Experience**: a branded, read-only in-app release-notes tab with first-run and upgrade visibility, version-aware seen tracking, section navigation, and an About action.
+- **Localization**: expanded the interface from 14 to 15 languages, adding Bulgarian.
+- **Testing**: locked local Playwright tooling with static checks, Chromium end-to-end coverage, and cross-browser smoke tests.
+
+### Changed
+- Consolidated document actions into a clearer header toolbar; reorganized Markdown formatting controls; refined disabled, dropdown, theme, and Private mode states.
+- Dragging any selected file now moves the complete multi-file selection; widened expanded-folder drop targets.
+- Word, character, and reading-time statistics refresh on every render and reopened document.
+
+### Fixed
+- Clipboard success feedback now waits for the actual copy result instead of assuming success.
+
+### Security
+- Updated DOMPurify and js-yaml; corrected integrity-checked browser assets; synchronized desktop dependencies; restored WebKit local-development support.
+
+---
+
+## [0.0.2] - 2026-08-31
 
 _Originally shipped internally as "4.0.0, Sprint 1-8 Complete."_
 
 ### Added
-- **Live Share**: polling-based real-time collaboration with host/editor/viewer roles, invite URL generation, participant presence list, and 2-second content sync. In-memory room store with 6-hour expiry and 30-second stale-participant pruning via `/api/live-room` (POST/GET/PATCH/DELETE).
-- **Comments & Reviews**: threaded comment system backed by IndexedDB — anchor text, threaded replies, resolve/reopen, delete, filter-by-resolved.
-- **Extended diagram engines**: PlantUML, Graphviz/DOT, D2, WaveDrom, ERD, and Pikchr via Kroki; interactive Markmap mind maps; Vega-Lite charts with theme detection; ABC music notation with Web Audio playback; GeoJSON/TopoJSON maps via Leaflet; STL 3D models via Three.js. Shared diagram toolbar (zoom, pan, copy SVG, download PNG, fullscreen).
-- **GitHub PAT Vault**: AES-GCM encrypted personal access token store, up to 50 named tokens.
-- **PDF Export**: client-side generation via `jsPDF` + `html2canvas`, with diagram serialization to PNG before capture.
-- **Editor toolbar**: text alignment, RTL/LTR toggle, emoji picker, Insert Diagram modal with 17 templates across 9 categories.
-- **15-language UI**: EN, ZH, JA, KO, FR, DE, ES, PT-BR, RU, AR, HI, BG, TR, IT.
-- **Trash window**: restore or permanently delete documents.
-- **PWA support**: service worker, cache-first static assets, network-first navigation/API.
-- **IndexedDB v3**: added `blobs`, `comments`, and `tokens` tables.
+- **Collaboration**
+  - **Live Share**: polling-based real-time collaboration with host/editor/viewer roles, invite URL generation, participant presence list, and 2-second content sync. In-memory room store with 6-hour expiry and 30-second stale-participant pruning via `/api/live-room` (POST/GET/PATCH/DELETE).
+  - **Comments & Reviews**: threaded comment system backed by IndexedDB — anchor text, threaded replies, resolve/reopen, delete, filter-by-resolved. Author name persisted in `localStorage`.
+- **Extended Diagram Engines**
+  - **KrokiViewer**: renders PlantUML, Graphviz/DOT, D2, WaveDrom, ERD, and Pikchr via the Kroki API as SVG.
+  - **MarkmapViewer**: interactive mind maps using `markmap-lib` + `markmap-view` with D3 zoom/pan.
+  - **VegaLiteViewer**: data charts via `vega-embed` with automatic dark/light theme detection.
+  - **ABCViewer**: ABC music notation rendered by `abcjs` with Play/Stop audio synthesis via the Web Audio API.
+  - **GeoMapViewer**: interactive GeoJSON and TopoJSON maps via Leaflet; TopoJSON converted client-side using `topojson-client`.
+  - **STLViewer**: 3D model viewer using Three.js + STLLoader + OrbitControls with a grid helper and auto-center/scale.
+  - **DiagramToolbar**: shared diagram toolbar (zoom in/out/reset, copy SVG, download PNG, fullscreen) used by all diagram viewers.
+  - **MarkdownPreview**: routes 14 fenced code block languages to their correct viewer.
+- **Security & Import**
+  - **GitHub PAT Vault**: AES-GCM encrypted personal access token store (`lib/crypto/pat-vault.ts`). Supports up to 50 named tokens; each token encrypted with a device-derived key stored in the IndexedDB `tokens` table.
+  - **GitHub Import**: PAT selection UI with add/delete flow; token-authenticated `Authorization` header on fetch.
+- **Export**
+  - **PDF Export**: client-side PDF generation via `jsPDF` + `html2canvas` with SVG serialization; serializes Mermaid and other SVG diagrams to PNG before capture, then pages content for A4.
+- **Editor Toolbar**
+  - **Text Alignment**: left, center, right, justify buttons insert `<div style="text-align:...">` wrappers.
+  - **RTL/LTR Toggle**: reads and sets `textDirection` from `useSettingsStore`; applied as `dir` attribute on the preview container.
+  - **Emoji Picker**: opens `EmojiPickerModal` backed by `@emoji-mart/react` (dynamic import); inserts emoji shortcode at cursor.
+  - **Insert Diagram**: opens `InsertDiagramModal` with 17 searchable diagram templates across 9 categories.
+- **Localization & Settings**
+  - **Multi-language UI**: complete translation map in `lib/i18n/index.ts` — EN, ZH, JA, KO, FR, DE, ES, PT-BR, RU, AR, HI, TR, IT (14 total; see 0.0.3 for the addition of Bulgarian).
+  - **Language Selector**: dropdown in SettingsModal to switch interface language; persisted via `useSettingsStore`.
+  - **Text Direction**: LTR/RTL toggle in SettingsModal.
+- **Workspace Management**
+  - **TrashModal**: dedicated trash window — restore or permanently delete individual documents, Empty Trash button with count.
+  - **ReleaseNotesModal**: branded release notes; auto-shows on first run after a version bump via `lastSeenVersion` comparison.
+- **ActivityBar & Navigation**
+  - Added Live Share (Wifi), Comments (MessageSquare), Trash (Trash2), and What's New (Newspaper) buttons to the ActivityBar's bottom utility section. Each dispatches a `md:open-*` custom event caught by AppHeader.
+- **PWA**
+  - **Service Worker** (`public/sw.js`): cache-first for static assets, network-first for navigation and API routes. Registered in `app/providers.tsx` on mount.
+- **Database**
+  - **IndexedDB v3**: added `blobs`, `comments`, and `tokens` tables. New interfaces: `BlobItem`, `CommentItem`, `ReplyItem`, `TokenItem`.
 
 ---
 
-## [0.1.0] - 2026-08-22
+## [0.0.1] - 2026-08-22
 
-_Originally shipped internally as "4.0.0."_
+_Originally shipped internally as "4.0.0."_ The very first working version of Dnyx Draft.
 
 ### Added
-- Migrated to **Next.js 16 (App Router)**, React 19, and strict TypeScript.
-- Restructured into a **Turborepo monorepo** (`apps/`, `packages/`) with pnpm workspaces.
-- **Tailwind CSS v4** design system with light/dark themes via `next-themes`.
-- Microsoft Word (`.docx`) export engine.
-- Marp-style presentation slide deck mode with keyboard navigation.
-- AST-synchronized bidirectional scrolling between editor and preview.
-- Interactive table builder; CSV/TSV-to-Markdown converter; auto-table formatter.
-- Document diagnostics: Flesch reading ease, word/syllable counts, reading/speaking time.
-- In-editor find & replace with regex support.
-- Local folder mounting via the File System Access API.
-- Template hub with 6 starter templates.
-- Floating table of contents with click-to-scroll navigation.
-- SEO/AEO/GEO metadata: OpenGraph, JSON-LD, sitemap, robots.txt, `llms.txt`.
+- **Major Framework & Architecture Migration**
+  - **Next.js 16 (App Router)**: completely migrated from legacy vanilla JavaScript to Next.js 16, React 19, and 100% strict TypeScript.
+  - **Turborepo Monorepo**: restructured into `apps/web`, `apps/desktop`, and `packages/` with centralized pnpm workspace configuration.
+  - **Tailwind CSS v4**: modern design system supporting a crisp Light Theme and sleek Dark Theme via `next-themes`.
+- **New Features & Capabilities**
+  - **Microsoft Word (`.docx`) Export Engine**: client-side document builder converting Markdown headings, styled tables, lists, and code blocks into standard Word `.docx` documents.
+  - **Interactive Presentation Slide Deck Mode**: Marp-style full-screen presentation deck with keyboard navigation (Arrow keys, Spacebar, PageUp/Down) and progress tracking.
+  - **AST Synchronized Scrolling**: line-matched proportional bidirectional scrolling between editor and preview panes.
+  - **Interactive Table Builder**: visual spreadsheet modal allowing users to create, align (left, center, right), resize, and insert Markdown tables.
+  - **CSV / TSV to Markdown Converter**: instant client-side converter to turn tabular spreadsheet data into Markdown tables.
+  - **Auto-Table & Document Formatter**: AST linter to align table columns with uniform padding.
+  - **Document Diagnostics & Readability Analytics**: Flesch Reading Ease score (/100), word/syllable counts, reading time, and speaking time calculations.
+  - **In-Editor Find & Replace Bar**: search with match count, case sensitivity, whole word, and regex support (`Ctrl+F`).
+  - **Native Web File System Access API**: mount and edit local PC folders directly in the browser via `showDirectoryPicker`.
+  - **Pre-Built Professional Template Hub**: 6 starter templates for READMEs, Technical RFCs, API Specifications, Academic papers, Meeting notes, and Feature tours.
+  - **Interactive Floating Table of Contents (TOC)**: auto-generated outline from `#` headers with smooth click-to-scroll navigation.
+- **SEO, AEO & GEO Enhancements**
+  - Added OpenGraph, Twitter card metadata, and Google-compliant JSON-LD `WebApplication` schema.
+  - Generated `sitemap.xml`, `robots.txt`, `public/llms.txt`, and `public/.well-known/llms.txt` for search engines and AI crawlers.
 
 ### Removed
-- Legacy vanilla-JS implementation.
+- Legacy vanilla-JS implementation and old single-file implementations.

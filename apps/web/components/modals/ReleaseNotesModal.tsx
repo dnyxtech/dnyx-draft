@@ -65,7 +65,29 @@ const RELEASE_NOTES = [
     ],
   },
   {
-    version: '0.2.0',
+    version: '0.0.4',
+    date: '2026-09-03',
+    highlights: [
+      'Workspace Safety & Trash: safer document-scoped persistence, conflict-copy preservation, responsive multi-select Trash with 30-day retention',
+      'More reliable Markdown parsing for math, footnotes, headings, and tables — plus a quick table selector',
+      'Preview & review reliability: per-document scroll position, stabilized comment highlights',
+      'Export appearance: remembered Light/Dark controls for HTML, PDF, and PNG exports',
+      'Restored production Live Share routing; all 15 localized URLs independently indexable',
+    ],
+  },
+  {
+    version: '0.0.3',
+    date: '2026-09-01',
+    highlights: [
+      'Comments rebuilt around precise text selections with synchronized highlights and nested replies',
+      'Consolidated header toolbar and reorganized Markdown formatting controls',
+      "Added the branded in-app release-notes tab (what you're reading now)",
+      'Expanded the interface from 14 to 15 languages, adding Bulgarian',
+      'Locked Playwright testing tooling; updated DOMPurify and js-yaml',
+    ],
+  },
+  {
+    version: '0.0.2',
     date: '2026-08-31',
     highlights: [
       'Live Share for real-time collaboration',
@@ -74,12 +96,12 @@ const RELEASE_NOTES = [
       'GitHub PAT vault (AES-GCM encrypted, up to 50 tokens)',
       'PDF export with diagram serialization',
       'Text alignment, RTL/LTR toggle, emoji picker, 17+ diagram templates',
-      '15-language UI (EN, ZH, JA, KO, FR, DE, ES, PT-BR, RU, AR, HI, BG, TR, IT)',
+      '14-language UI foundation',
       'Trash window, PWA support, IndexedDB v3',
     ],
   },
   {
-    version: '0.1.0',
+    version: '0.0.1',
     date: '2026-08-22',
     highlights: [
       'Migrated to Next.js 16, React 19, strict TypeScript, and a Turborepo monorepo',

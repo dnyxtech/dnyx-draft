@@ -53,6 +53,7 @@ import { formatMarkdownDocument } from '@/lib/utils/markdown-formatter';
 import { DataConverterModal } from '../modals/DataConverterModal';
 import { EmojiPickerModal } from '../modals/EmojiPickerModal';
 import { InsertDiagramModal } from '../modals/InsertDiagramModal';
+import { InsertMediaModal } from '../modals/InsertMediaModal';
 import { TableBuilderModal } from '../modals/TableBuilderModal';
 
 interface EditorToolbarProps {
@@ -83,6 +84,7 @@ export const EditorToolbar: React.FC<EditorToolbarProps> = ({
   const [converterModalOpen, setConverterModalOpen] = useState(false);
   const [emojiPickerOpen, setEmojiPickerOpen] = useState(false);
   const [diagramModalOpen, setDiagramModalOpen] = useState(false);
+  const [mediaModalOpen, setMediaModalOpen] = useState(false);
   const [isListening, setIsListening] = useState(false);
   const [quickTableOpen, setQuickTableOpen] = useState(false);
   const [quickTableHover, setQuickTableHover] = useState<[number, number]>([0, 0]);
@@ -520,9 +522,7 @@ export const EditorToolbar: React.FC<EditorToolbarProps> = ({
             variant="ghost"
             size="icon"
             className="h-7 w-7 text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-slate-100"
-            onClick={() =>
-              onInsert('![', '](https://via.placeholder.com/400x200)', 'Image caption')
-            }
+            onClick={() => setMediaModalOpen(true)}
             title="Insert Image"
           >
             <ImageIcon className="h-3.5 w-3.5" />
@@ -850,6 +850,11 @@ export const EditorToolbar: React.FC<EditorToolbarProps> = ({
         open={diagramModalOpen}
         onOpenChange={setDiagramModalOpen}
         onInsert={(template) => onInsert(template, '')}
+      />
+      <InsertMediaModal
+        open={mediaModalOpen}
+        onOpenChange={setMediaModalOpen}
+        onInsert={(markdown) => onInsert(markdown, '')}
       />
     </>
   );
