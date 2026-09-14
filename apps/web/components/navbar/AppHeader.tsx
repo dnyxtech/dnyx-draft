@@ -4,6 +4,7 @@ import {
   Activity,
   BookOpen,
   ChevronDown,
+  Code2,
   Columns,
   Command,
   Edit3,
@@ -368,6 +369,12 @@ export const AppHeader: React.FC = () => {
                 <Link href="/readme-builder" className="flex items-center gap-2 cursor-pointer">
                   <BookOpen className="text-emerald-500" />
                   README Builder
+                </Link>
+              </DropdownMenuItem>
+              <DropdownMenuItem asChild>
+                <Link href="/svg-editor" className="flex items-center gap-2 cursor-pointer">
+                  <Code2 className="text-blue-500" />
+                  SVG Editor
                 </Link>
               </DropdownMenuItem>
 

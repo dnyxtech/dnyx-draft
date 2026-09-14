@@ -4,32 +4,93 @@ import { ExternalLink, Megaphone, X } from 'lucide-react';
 import type React from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 
-const APP_VERSION = '4.0.0';
+const APP_VERSION = '1.0.0';
 
 const RELEASE_NOTES = [
   {
-    version: '4.0.0',
-    date: '2026-08-30',
+    version: '1.0.0',
+    date: '2026-09-14',
     highlights: [
-      'Rebuilt from scratch with Next.js 16, TypeScript, and Tailwind CSS v4',
-      'Local-first IndexedDB workspace with unlimited documents and folders',
-      'Extended diagram engines: Markmap, Vega-Lite, PlantUML, Graphviz, D2, WaveDrom, ABC, GeoJSON, STL',
-      'Interactive diagram toolbars with zoom, pan, copy SVG/PNG',
-      'Inline comments and review system with threaded replies',
+      '🚀 Public launch of Dnyx Draft — first stable public release',
+      'New: SVG Editor — live code-to-preview SVG playground with sandboxed rendering, inline parse-error detection, copy & .svg download',
+    ],
+  },
+  {
+    version: '0.8.0',
+    date: '2026-09-08',
+    highlights: [
+      'Landing page FAQ section and interactive product demo added',
+      'Footer finalized with tool links and legal pages',
+    ],
+  },
+  {
+    version: '0.7.0',
+    date: '2026-09-08',
+    highlights: [
+      'Landing site scaffolded: navbar, hero, footer, and providers',
+      'Feature grid, use-cases, comparison matrix, and architecture sections built',
+    ],
+  },
+  {
+    version: '0.6.0',
+    date: '2026-09-08',
+    highlights: [
+      'Turborepo pipeline wired with build and deploy scripts',
+      'Root-level dev/build/deploy commands for both apps',
+    ],
+  },
+  {
+    version: '0.5.0',
+    date: '2026-09-07',
+    highlights: [
+      'Cloudflare Workers deployment configured for the web app and landing site',
+      'Vite build config and Wrangler manifests added per app',
+    ],
+  },
+  {
+    version: '0.4.0',
+    date: '2026-09-07',
+    highlights: [
+      'Repository prepared for open source',
+      'Conventional commit linting added',
+      'Monorepo package manifests cleaned up (crypto-vault, markdown-engine, storage, ui)',
+    ],
+  },
+  {
+    version: '0.3.0',
+    date: '2026-09-07',
+    highlights: [
+      'Initial commit of the full editor engine and workspace to the public repository',
+      'README Builder — guided README generator with GitHub auto-fill',
+    ],
+  },
+  {
+    version: '0.2.0',
+    date: '2026-08-31',
+    highlights: [
       'Live Share for real-time collaboration',
-      'Trash window with restore and permanent delete',
-      'Emoji picker with full emoji database',
-      'Insert Diagram modal with 17+ templates',
-      'Text alignment toolbar (left, center, right, justify)',
-      'RTL/LTR text direction toggle',
-      'PDF export with proper page breaks and diagram serialization',
+      'Inline comments and threaded review system',
+      'Extended diagram engines: PlantUML, Graphviz, D2, WaveDrom, ERD, Pikchr, Markmap, Vega-Lite, ABC notation, GeoJSON/TopoJSON maps, STL 3D models',
       'GitHub PAT vault (AES-GCM encrypted, up to 50 tokens)',
+      'PDF export with diagram serialization',
+      'Text alignment, RTL/LTR toggle, emoji picker, 17+ diagram templates',
       '15-language UI (EN, ZH, JA, KO, FR, DE, ES, PT-BR, RU, AR, HI, BG, TR, IT)',
-      'PWA support with service worker and offline caching',
-      'Pomodoro focus timer with daily word goal tracking',
-      'Knowledge graph view of document connections',
-      'Voice-to-text dictation',
-      'Command palette, global search, template picker',
+      'Trash window, PWA support, IndexedDB v3',
+    ],
+  },
+  {
+    version: '0.1.0',
+    date: '2026-08-22',
+    highlights: [
+      'Migrated to Next.js 16, React 19, strict TypeScript, and a Turborepo monorepo',
+      'Tailwind CSS v4 design system with light/dark themes',
+      'Microsoft Word (.docx) export engine',
+      'Presentation slide deck mode',
+      'Synchronized editor/preview scrolling',
+      'Interactive table builder, CSV/TSV converter, auto-formatter',
+      'Document diagnostics & readability analytics',
+      'Find & replace, local folder mounting, template hub, floating TOC',
+      'SEO/AEO/GEO metadata and crawler support',
     ],
   },
 ];
@@ -79,7 +140,7 @@ export const ReleaseNotesModal: React.FC<ReleaseNotesModalProps> = ({ open, onOp
 
         <div className="px-5 py-3 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between">
           <a
-            href="https://github.com"
+            href="https://github.com/dnyxtech/dnyx-draft/blob/main/CHANGELOG.md"
             target="_blank"
             rel="noreferrer"
             className="flex items-center gap-1.5 text-xs text-slate-500 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"

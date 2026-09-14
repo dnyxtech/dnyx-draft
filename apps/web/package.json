@@ -1,6 +1,6 @@
 {
   "name": "web",
-  "version": "4.0.0",
+  "version": "1.0.0",
   "private": true,
   "license": "MIT",
   "scripts": {
@@ -19,6 +19,7 @@
   },
   "dependencies": {
     "@codemirror/lang-markdown": "^6.5.2",
+    "@codemirror/lang-xml": "^6.1.0",
     "@codemirror/language-data": "^6.5.2",
     "@emoji-mart/data": "^1.2.1",
     "@emoji-mart/react": "^1.1.1",

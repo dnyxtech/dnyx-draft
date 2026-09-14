@@ -1,8 +1,17 @@
 'use client';
 
-import { ArrowUpRight, GitBranch, Link2, MessageSquare, Radio, Users } from 'lucide-react';
+import {
+  ArrowUpRight,
+  Code2,
+  GitBranch,
+  Link2,
+  MessageSquare,
+  Radio,
+  ShieldCheck,
+  Users,
+} from 'lucide-react';
 import type React from 'react';
-import { APP_URL, README_BUILDER_URL } from '@/lib/constants';
+import { APP_URL, README_BUILDER_URL, SVG_EDITOR_URL } from '@/lib/constants';
 
 export const ToolsSpotlight: React.FC = () => {
   return (
@@ -20,12 +29,13 @@ export const ToolsSpotlight: React.FC = () => {
             Share, Collaborate &amp; Ship Docs Faster
           </h2>
           <p className="text-slate-600 dark:text-slate-300 text-sm sm:text-base leading-relaxed">
-            Two purpose-built tools that go beyond a single-player editor — real-time collaboration and a
-            dedicated README generator, both running on the same local-first engine.
+            Purpose-built tools that go beyond a single-player editor — real-time collaboration, a
+            dedicated README generator, and a live SVG playground, all running on the same local-first
+            engine.
           </p>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 max-w-6xl mx-auto">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 max-w-6xl mx-auto">
           {/* Live Share card */}
           <div className="p-7 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-[#0b0f19] shadow-xs hover:shadow-xl transition-all duration-200 flex flex-col">
             <div className="flex items-center gap-3 mb-4">
@@ -99,6 +109,44 @@ export const ToolsSpotlight: React.FC = () => {
               className="inline-flex items-center gap-1 text-sm font-semibold text-blue-600 dark:text-blue-400 hover:underline mt-auto"
             >
               Try the README Builder <ArrowUpRight className="h-3.5 w-3.5" />
+            </a>
+          </div>
+
+          {/* SVG Editor card */}
+          <div className="p-7 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-[#0b0f19] shadow-xs hover:shadow-xl transition-all duration-200 flex flex-col">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="p-3 rounded-xl bg-violet-50 dark:bg-violet-950/60 border border-violet-200 dark:border-violet-800 text-violet-600 dark:text-violet-400">
+                <Code2 className="h-5 w-5" />
+              </div>
+              <span className="text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full border bg-violet-50 dark:bg-violet-950/50 text-violet-700 dark:text-violet-300 border-violet-200 dark:border-violet-800">
+                SVG Editor
+              </span>
+            </div>
+            <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-2">
+              Write raw SVG, see it rendered instantly
+            </h3>
+            <p className="text-sm text-slate-600 dark:text-slate-400 leading-relaxed mb-5 flex-1">
+              A live code-to-preview playground for hand-writing SVG markup. Edit in a syntax-highlighted
+              editor and watch the split-pane preview update as you type — with parse errors caught
+              inline instead of a blank canvas.
+            </p>
+            <div className="space-y-2 mb-6">
+              {['Live split-pane preview', 'Inline parse-error detection', 'Sandboxed rendering — scripts never execute', 'One-click copy & .svg download'].map(
+                (line) => (
+                  <div key={line} className="flex items-center gap-2 text-xs text-slate-700 dark:text-slate-300 font-medium">
+                    <ShieldCheck className="h-3.5 w-3.5 text-violet-500 shrink-0" />
+                    <span>{line}</span>
+                  </div>
+                ),
+              )}
+            </div>
+            <a
+              href={SVG_EDITOR_URL}
+              target="_blank"
+              rel="noreferrer"
+              className="inline-flex items-center gap-1 text-sm font-semibold text-violet-600 dark:text-violet-400 hover:underline mt-auto"
+            >
+              Open the SVG Editor <ArrowUpRight className="h-3.5 w-3.5" />
             </a>
           </div>
         </div>

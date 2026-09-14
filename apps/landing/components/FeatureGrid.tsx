@@ -3,6 +3,7 @@
 import {
   Activity,
   Archive,
+  Code2,
   Command,
   Download,
   FolderTree,
@@ -43,6 +44,12 @@ const CATEGORIES: {
         title: 'Knowledge Graph & WikiLinks',
         description:
           'Force-directed graph of every document linked by [[wikilinks]], plus a template hub, table builder, and format converters.',
+      },
+      {
+        icon: <Code2 className="h-5 w-5 text-violet-600 dark:text-violet-400" />,
+        title: 'SVG Editor',
+        description:
+          'Write raw SVG and watch it render live in a split pane, with inline parse-error detection and sandboxed rendering that keeps untrusted markup fully contained.',
       },
     ],
   },
