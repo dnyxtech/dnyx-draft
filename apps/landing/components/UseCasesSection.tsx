@@ -1,26 +1,15 @@
 'use client';
 
-import {
-  Binary,
-  BookOpen,
-  Briefcase,
-  CheckCircle2,
-  Code2,
-  GraduationCap,
-  Lock,
-  Presentation,
-  ShieldCheck,
-  Terminal,
-  Users,
-  Workflow,
-} from 'lucide-react';
+import { BookOpen, CheckCircle2, GraduationCap, Lock, Terminal } from 'lucide-react';
 import type React from 'react';
+import { useState } from 'react';
+import { Section, SectionHeader } from './ui/Section';
 
 const USE_CASES = [
   {
-    icon: <Terminal className="h-6 w-6 text-blue-600 dark:text-blue-400" />,
+    icon: <Terminal className="h-6 w-6" />,
     role: 'Software Engineers & Architects',
-    tagline: 'Technical RFCs, API Specs & Code Documentation',
+    tagline: 'Technical RFCs, API specs & code documentation',
     description:
       'Write architecture decision records with interactive Mermaid, Graphviz, and D2 diagrams, syntax-highlighted code blocks, and a fuzzy command palette.',
     bullets: [
@@ -29,12 +18,11 @@ const USE_CASES = [
       'Native local disk folder mounting via File System Access',
       'Live Share for pairing on RFCs in real time',
     ],
-    badgeColor: 'bg-blue-50 dark:bg-blue-950/50 text-blue-700 dark:text-blue-300 border-blue-200 dark:border-blue-800',
   },
   {
-    icon: <GraduationCap className="h-6 w-6 text-purple-600 dark:text-purple-400" />,
+    icon: <GraduationCap className="h-6 w-6" />,
     role: 'Students, Academics & Researchers',
-    tagline: 'Mathematical Proofs, Equations & Research Papers',
+    tagline: 'Mathematical proofs, equations & research papers',
     description:
       'Draft mathematical derivations with instant KaTeX LaTeX formula rendering. Cross-reference related research papers using internal [[WikiLinks]].',
     bullets: [
@@ -43,12 +31,11 @@ const USE_CASES = [
       'Word count & reading pace metrics in real-time',
       'One-click Table of Contents generation',
     ],
-    badgeColor: 'bg-purple-50 dark:bg-purple-950/50 text-purple-700 dark:text-purple-300 border-purple-200 dark:border-purple-800',
   },
   {
-    icon: <BookOpen className="h-6 w-6 text-emerald-600 dark:text-emerald-400" />,
+    icon: <BookOpen className="h-6 w-6" />,
     role: 'Technical Writers & Content Creators',
-    tagline: 'Structured Documentation, Guides & Word Export',
+    tagline: 'Structured documentation, guides & Word export',
     description:
       'Build complex data tables with the visual table editor, convert raw CSVs into markdown grids, and generate a polished README with the guided builder.',
     bullets: [
@@ -57,12 +44,11 @@ const USE_CASES = [
       'AI-assisted summarize, rewrite & grammar fixes (BYOK)',
       'Flesch Reading Ease readability scoring',
     ],
-    badgeColor: 'bg-emerald-50 dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800',
   },
   {
-    icon: <Lock className="h-6 w-6 text-amber-600 dark:text-amber-400" />,
+    icon: <Lock className="h-6 w-6" />,
     role: 'Privacy-Conscious Professionals',
-    tagline: 'Confidential Notes & Zero-Knowledge Vaults',
+    tagline: 'Confidential notes & zero-knowledge vaults',
     description:
       'Store sensitive business strategies, passwords, and private journals with military-grade PBKDF2 + AES-256-GCM client-side encryption.',
     bullets: [
@@ -71,63 +57,55 @@ const USE_CASES = [
       'Zero server tracking or telemetry',
       'Complete workspace backup as ZIP archive',
     ],
-    badgeColor: 'bg-amber-50 dark:bg-amber-950/50 text-amber-700 dark:text-amber-300 border-amber-200 dark:border-amber-800',
   },
 ];
 
 export const UseCasesSection: React.FC = () => {
+  const [active, setActive] = useState(0);
+  const current = USE_CASES[active];
+
   return (
-    <section id="use-cases" className="py-20 border-t border-slate-200/80 dark:border-slate-800/80 bg-slate-50/50 dark:bg-[#070a11] transition-colors">
-      <div className="max-w-7xl mx-auto px-4 sm:px-8">
-        <div className="text-center max-w-3xl mx-auto mb-14">
-          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-indigo-50 dark:bg-indigo-950/60 border border-indigo-200 dark:border-indigo-800 text-indigo-700 dark:text-indigo-300 text-xs font-semibold mb-3">
-            <Users className="h-3.5 w-3.5" />
-            <span>Target Audiences &amp; Workflows</span>
-          </div>
-          <h2 className="text-3xl sm:text-4xl font-extrabold text-slate-900 dark:text-white tracking-tight mb-3">
-            Built for High-Velocity Thinking
-          </h2>
-          <p className="text-slate-600 dark:text-slate-300 text-sm sm:text-base leading-relaxed">
-            Whether you are writing a distributed systems RFC, solving calculus equations, or securing proprietary notes, Dnyx Draft adapts to your workflow.
-          </p>
-        </div>
+    <Section id="use-cases" tone="muted">
+      <SectionHeader
+        align="center"
+        title="Built for high-velocity thinking"
+        description="Whether you are writing a distributed systems RFC, solving calculus equations, or securing proprietary notes, Dnyx Draft adapts to your workflow."
+      />
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-6xl mx-auto">
+      <div className="grid grid-cols-1 lg:grid-cols-[280px_1fr] gap-6 lg:gap-10">
+        <div className="flex lg:flex-col gap-2 overflow-x-auto lg:overflow-visible pb-2 lg:pb-0">
           {USE_CASES.map((item, idx) => (
-            <div
-              key={idx}
-              className="p-7 rounded-2xl border border-slate-200/90 dark:border-slate-800/90 bg-white dark:bg-[#0b0f19] hover:border-blue-500/80 dark:hover:border-blue-500/80 shadow-xs hover:shadow-xl transition-all duration-200 flex flex-col justify-between"
+            <button
+              key={item.role}
+              type="button"
+              onClick={() => setActive(idx)}
+              className={`shrink-0 lg:shrink flex items-center gap-3 text-left px-4 py-3 rounded-[var(--radius)] border transition-colors ${
+                idx === active
+                  ? 'border-primary bg-card text-foreground'
+                  : 'border-transparent text-muted-foreground hover:bg-secondary/40'
+              }`}
             >
-              <div>
-                <div className="flex items-start justify-between gap-4 mb-4">
-                  <div className="p-3 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
-                    {item.icon}
-                  </div>
-                  <span className={`text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full border ${item.badgeColor}`}>
-                    {item.role}
-                  </span>
-                </div>
-
-                <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-2">
-                  {item.tagline}
-                </h3>
-                <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed mb-6">
-                  {item.description}
-                </p>
-              </div>
-
-              <div className="pt-4 border-t border-slate-100 dark:border-slate-850 space-y-2">
-                {item.bullets.map((bullet, bIdx) => (
-                  <div key={bIdx} className="flex items-center gap-2 text-xs text-slate-700 dark:text-slate-300 font-medium">
-                    <CheckCircle2 className="h-3.5 w-3.5 text-emerald-500 shrink-0" />
-                    <span>{bullet}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
+              <span className={idx === active ? 'text-primary' : ''}>{item.icon}</span>
+              <span className="text-sm font-medium whitespace-nowrap lg:whitespace-normal">{item.role}</span>
+            </button>
           ))}
         </div>
+
+        <div key={current.role} className="p-7 md:p-8 rounded-[var(--radius)] border border-border bg-card">
+          <h3 className="text-xl font-medium text-foreground mb-2">{current.tagline}</h3>
+          <p className="text-sm text-muted-foreground leading-relaxed mb-6 max-w-2xl">
+            {current.description}
+          </p>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-2">
+            {current.bullets.map((bullet) => (
+              <div key={bullet} className="flex items-center gap-2 text-sm text-foreground font-medium">
+                <CheckCircle2 className="h-4 w-4 text-primary shrink-0" />
+                <span>{bullet}</span>
+              </div>
+            ))}
+          </div>
+        </div>
       </div>
-    </section>
+    </Section>
   );
 };

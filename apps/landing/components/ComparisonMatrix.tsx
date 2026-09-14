@@ -2,160 +2,215 @@
 
 import { AlertCircle, CheckCircle2, XCircle } from 'lucide-react';
 import type React from 'react';
+import { Section, SectionHeader } from './ui/Section';
+
+type Status = 'yes' | 'partial' | 'no';
+interface Cell {
+  status: Status;
+  label: string;
+}
+
+const COMPETITORS = ['notion', 'obsidian', 'typora', 'hackmd'] as const;
+type CompetitorKey = (typeof COMPETITORS)[number];
+const COMPETITOR_LABEL: Record<CompetitorKey, string> = {
+  notion: 'Notion',
+  obsidian: 'Obsidian',
+  typora: 'Typora',
+  hackmd: 'HackMD',
+};
 
 interface ComparisonRow {
   feature: string;
-  mv: { status: 'yes' | 'partial' | 'no'; label: string };
-  notion: { status: 'yes' | 'partial' | 'no'; label: string };
-  obsidian: { status: 'yes' | 'partial' | 'no'; label: string };
-  typora: { status: 'yes' | 'partial' | 'no'; label: string };
+  dnyx: Cell;
+  notion: Cell;
+  obsidian: Cell;
+  typora: Cell;
+  hackmd: Cell;
 }
+
+const PRICING_ROW: ComparisonRow = {
+  feature: 'Pricing',
+  dnyx: { status: 'yes', label: 'Free & Open Source' },
+  notion: { status: 'no', label: 'Free / $10 Plus / $20 Business per mo' },
+  obsidian: { status: 'partial', label: 'Free (personal); Sync $4/mo, Commercial $50/yr' },
+  typora: { status: 'partial', label: '$14.99 one-time license' },
+  hackmd: { status: 'partial', label: 'Free (3 seats); Prime Team $5/user/mo' },
+};
 
 const COMPARISONS: ComparisonRow[] = [
   {
     feature: 'Local-First Offline Persistence',
-    mv: { status: 'yes', label: '100% Offline (IndexedDB)' },
+    dnyx: { status: 'yes', label: '100% Offline (IndexedDB)' },
     notion: { status: 'no', label: 'Cloud-Required' },
     obsidian: { status: 'yes', label: 'Local Files' },
     typora: { status: 'yes', label: 'Local Files' },
+    hackmd: { status: 'no', label: 'Cloud-Required' },
   },
   {
     feature: 'Runs in the Browser (No Install)',
-    mv: { status: 'yes', label: 'Zero-Install Web App' },
+    dnyx: { status: 'yes', label: 'Zero-Install Web App' },
     notion: { status: 'yes', label: 'Web + Desktop' },
     obsidian: { status: 'no', label: 'Desktop App Only' },
     typora: { status: 'no', label: 'Desktop App Only' },
+    hackmd: { status: 'yes', label: 'Web App' },
   },
   {
     feature: 'BYOK AI Writing Assistant',
-    mv: { status: 'yes', label: 'Your Own Anthropic/OpenAI Key' },
+    dnyx: { status: 'yes', label: 'Your Own Anthropic/OpenAI Key' },
     notion: { status: 'partial', label: 'Notion AI Add-on ($)' },
     obsidian: { status: 'partial', label: 'Via Plugin' },
     typora: { status: 'no', label: 'Not Supported' },
+    hackmd: { status: 'no', label: 'Not Supported' },
   },
   {
     feature: 'Real-Time Collaboration',
-    mv: { status: 'yes', label: 'Live Share, No Account' },
+    dnyx: { status: 'yes', label: 'Live Share, No Account' },
     notion: { status: 'yes', label: 'Supported' },
     obsidian: { status: 'partial', label: 'Paid Sync Plugin' },
     typora: { status: 'no', label: 'Not Supported' },
+    hackmd: { status: 'yes', label: 'Supported' },
   },
   {
     feature: 'Multi-Format File Viewer',
-    mv: { status: 'yes', label: 'CSV, JSON, XLSX, PDF, Jupyter…' },
+    dnyx: { status: 'yes', label: 'CSV, JSON, XLSX, PDF, Jupyter…' },
     notion: { status: 'partial', label: 'Embeds Only' },
     obsidian: { status: 'partial', label: 'Via Plugins' },
     typora: { status: 'no', label: 'Markdown Only' },
+    hackmd: { status: 'no', label: 'Markdown Only' },
   },
   {
     feature: '12+ Diagram Engines',
-    mv: { status: 'yes', label: 'Mermaid, D2, Graphviz, PlantUML…' },
+    dnyx: { status: 'yes', label: 'Mermaid, D2, Graphviz, PlantUML…' },
     notion: { status: 'partial', label: 'Mermaid Only' },
     obsidian: { status: 'partial', label: 'Mermaid via Plugin' },
     typora: { status: 'partial', label: 'Mermaid Only' },
+    hackmd: { status: 'partial', label: 'Mermaid Only' },
   },
   {
     feature: 'Client-Side Password Encryption',
-    mv: { status: 'yes', label: 'AES-256-GCM Vault' },
+    dnyx: { status: 'yes', label: 'AES-256-GCM Vault' },
     notion: { status: 'no', label: 'No File Passwords' },
     obsidian: { status: 'partial', label: 'Via Plugin' },
     typora: { status: 'no', label: 'No Encryption' },
+    hackmd: { status: 'no', label: 'No File Passwords' },
   },
   {
     feature: 'Direct Word (.docx) & ZIP Export',
-    mv: { status: 'yes', label: 'Instant Client-side' },
+    dnyx: { status: 'yes', label: 'Instant Client-side' },
     notion: { status: 'no', label: 'HTML/PDF Only' },
     obsidian: { status: 'partial', label: 'Via Pandoc CLI' },
     typora: { status: 'yes', label: 'Via Pandoc' },
+    hackmd: { status: 'no', label: 'PDF/HTML Only' },
   },
   {
     feature: 'Account / Registration Required',
-    mv: { status: 'yes', label: 'No Login (Instant)' },
+    dnyx: { status: 'yes', label: 'No Login (Instant)' },
     notion: { status: 'no', label: 'Mandatory Login' },
     obsidian: { status: 'yes', label: 'No Account (Free)' },
     typora: { status: 'yes', label: 'No Account (Paid App)' },
+    hackmd: { status: 'no', label: 'Mandatory Login' },
   },
 ];
 
-const StatusCell: React.FC<{ data: { status: 'yes' | 'partial' | 'no'; label: string }; isMv?: boolean }> = ({
-  data,
-  isMv,
-}) => {
-  return (
-    <div
-      className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-medium ${
-        data.status === 'yes'
-          ? isMv
-            ? 'bg-emerald-100 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300 font-semibold'
-            : 'text-emerald-700 dark:text-emerald-400'
-          : data.status === 'partial'
-            ? 'text-amber-700 dark:text-amber-400'
-            : 'text-slate-500 dark:text-slate-400'
-      }`}
-    >
-      {data.status === 'yes' ? (
-        <CheckCircle2 className="h-3.5 w-3.5 text-emerald-500 shrink-0" />
-      ) : data.status === 'partial' ? (
-        <AlertCircle className="h-3.5 w-3.5 text-amber-500 shrink-0" />
-      ) : (
-        <XCircle className="h-3.5 w-3.5 text-rose-500 shrink-0" />
-      )}
-      <span>{data.label}</span>
-    </div>
-  );
+const STATUS_ICON: Record<Status, React.ReactNode> = {
+  yes: <CheckCircle2 className="h-3.5 w-3.5 text-primary shrink-0" />,
+  partial: <AlertCircle className="h-3.5 w-3.5 text-accent-warn shrink-0" />,
+  no: <XCircle className="h-3.5 w-3.5 text-muted-foreground shrink-0" />,
 };
+
+const STATUS_TEXT: Record<Status, string> = {
+  yes: 'text-foreground',
+  partial: 'text-accent-warn',
+  no: 'text-muted-foreground',
+};
+
+const StatusCell: React.FC<{ data: Cell }> = ({ data }) => (
+  <div className={`inline-flex items-center gap-1.5 text-xs font-medium ${STATUS_TEXT[data.status]}`}>
+    {STATUS_ICON[data.status]}
+    <span>{data.label}</span>
+  </div>
+);
+
+const ROWS = [PRICING_ROW, ...COMPARISONS];
 
 export const ComparisonMatrix: React.FC = () => {
   return (
-    <section id="comparison" className="py-24 max-w-7xl mx-auto px-4 sm:px-8">
-      <div className="text-center max-w-3xl mx-auto mb-16">
-        <h2 className="text-3xl sm:text-4xl font-extrabold text-slate-900 dark:text-white tracking-tight mb-4">
-          How Dnyx Draft Compares
-        </h2>
-        <p className="text-slate-600 dark:text-slate-300 text-sm sm:text-base">
-          See why engineers, technical writers, and researchers choose Dnyx Draft over cloud silos.
-        </p>
-      </div>
+    <Section id="comparison" tone="muted" spacing="loose">
+      <SectionHeader
+        align="center"
+        title="How Dnyx Draft compares"
+        description="Dnyx Draft is free and open source — no seats, no tiers, no upsell. See how it stacks up against the note-taking and Markdown tools people already pay for."
+      />
 
-      <div className="max-w-5xl mx-auto overflow-x-auto border border-slate-200 dark:border-slate-800 rounded-2xl shadow-xl bg-white dark:bg-[#0b0f19]">
+      {/* Table — tablet and up */}
+      <div className="hidden md:block max-w-6xl mx-auto overflow-x-auto border border-border rounded-[var(--radius)] bg-card">
         <table className="w-full text-left text-xs border-collapse">
           <thead>
-            <tr className="bg-slate-100 dark:bg-slate-900/90 border-b border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-200">
-              <th className="p-4 font-bold text-sm">Capability</th>
-              <th className="p-4 font-bold text-sm bg-blue-500/10 text-blue-600 dark:text-blue-400">
-                Dnyx Draft
-              </th>
-              <th className="p-4 font-medium text-slate-500">Notion</th>
-              <th className="p-4 font-medium text-slate-500">Obsidian</th>
-              <th className="p-4 font-medium text-slate-500">Typora</th>
+            <tr className="border-b border-border text-muted-foreground">
+              <th className="p-4 font-semibold text-sm text-foreground">Capability</th>
+              <th className="p-4 font-semibold text-sm text-primary bg-primary/5">Dnyx Draft</th>
+              {COMPETITORS.map((key) => (
+                <th key={key} className="p-4 font-medium">
+                  {COMPETITOR_LABEL[key]}
+                </th>
+              ))}
             </tr>
           </thead>
-          <tbody className="divide-y divide-slate-200 dark:divide-slate-800">
-            {COMPARISONS.map((row, idx) => (
+          <tbody className="divide-y divide-border">
+            {ROWS.map((row) => (
               <tr
-                key={idx}
-                className="hover:bg-slate-50/60 dark:hover:bg-slate-850/40 transition-colors"
+                key={row.feature}
+                className={`hover:bg-secondary/30 transition-colors ${row === PRICING_ROW ? 'bg-secondary/20' : ''}`}
               >
-                <td className="p-4 font-semibold text-slate-800 dark:text-slate-200">
-                  {row.feature}
+                <td className="p-4 font-medium text-foreground">{row.feature}</td>
+                <td className="p-4 bg-primary/5">
+                  <StatusCell data={row.dnyx} />
                 </td>
-                <td className="p-4 bg-blue-500/5">
-                  <StatusCell data={row.mv} isMv />
-                </td>
-                <td className="p-4">
-                  <StatusCell data={row.notion} />
-                </td>
-                <td className="p-4">
-                  <StatusCell data={row.obsidian} />
-                </td>
-                <td className="p-4">
-                  <StatusCell data={row.typora} />
-                </td>
+                {COMPETITORS.map((key) => (
+                  <td key={key} className="p-4">
+                    <StatusCell data={row[key]} />
+                  </td>
+                ))}
               </tr>
             ))}
           </tbody>
         </table>
       </div>
-    </section>
+
+      {/* Card fallback — mobile only, same data source */}
+      <div className="md:hidden space-y-4 max-w-xl mx-auto">
+        <div className="rounded-[var(--radius)] border-l-2 border-primary bg-card border border-border p-5">
+          <h3 className="font-mono font-medium text-sm text-primary mb-3">Dnyx Draft</h3>
+          <dl className="space-y-3">
+            {ROWS.map((row) => (
+              <div key={row.feature} className="flex flex-col gap-1">
+                <dt className="text-xs text-muted-foreground">{row.feature}</dt>
+                <dd>
+                  <StatusCell data={row.dnyx} />
+                </dd>
+              </div>
+            ))}
+          </dl>
+        </div>
+
+        {COMPETITORS.map((key) => (
+          <div key={key} className="rounded-[var(--radius)] bg-secondary/30 border border-border p-5">
+            <h3 className="font-mono font-medium text-sm text-foreground mb-3">
+              {COMPETITOR_LABEL[key]}
+            </h3>
+            <dl className="space-y-3">
+              {ROWS.map((row) => (
+                <div key={row.feature} className="flex flex-col gap-1">
+                  <dt className="text-xs text-muted-foreground">{row.feature}</dt>
+                  <dd>
+                    <StatusCell data={row[key]} />
+                  </dd>
+                </div>
+              ))}
+            </dl>
+          </div>
+        ))}
+      </div>
+    </Section>
   );
 };

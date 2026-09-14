@@ -1,7 +1,22 @@
+import { IBM_Plex_Sans, JetBrains_Mono } from 'next/font/google';
 import type { Metadata } from 'next';
 import type React from 'react';
 import '../styles/globals.css';
 import { Providers } from './providers';
+
+const plexSans = IBM_Plex_Sans({
+  subsets: ['latin'],
+  weight: ['400', '500', '600', '700'],
+  variable: '--font-plex-sans',
+  display: 'swap',
+});
+
+const jetbrainsMono = JetBrains_Mono({
+  subsets: ['latin'],
+  weight: ['500', '700'],
+  variable: '--font-jetbrains-mono',
+  display: 'swap',
+});
 
 export const metadata: Metadata = {
   title: 'Dnyx Draft — Local-First Markdown Workspace with BYOK AI',
@@ -28,8 +43,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" suppressHydrationWarning>
-      <body className="antialiased selection:bg-blue-500/20 selection:text-blue-600">
+    <html lang="en" suppressHydrationWarning className={`${plexSans.variable} ${jetbrainsMono.variable}`}>
+      <body className="antialiased selection:bg-primary/20 selection:text-primary">
         <Providers>{children}</Providers>
       </body>
     </html>
